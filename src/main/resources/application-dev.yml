@@ -1,0 +1,59 @@
+server:
+  port: 8084
+spring:
+  config:
+    use-legacy-processing: true
+  profiles:
+    include: common
+  datasource:
+    username: root
+    password: Nguyenvietket2906
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/warehouse?useUnicode=yes&characterEncoding=UTF-8
+  jpa:
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ketmax121@gmail.com
+    password: bpwgcdgsvhwqeikj
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  mvc:
+    path match:
+      matching-strategy: ant_path_matcher
+  main:
+    allow-bean-definition-overriding: true
+  servlet:
+    multipart:
+      max-request-size: 100MB
+      max-file-size: 100MB
+
+
+inventory:
+  logs:
+    path: ./logs/development
+
+application:
+  default-password: $2a$12$CVy4btq466w7HPQbLx0eNetqANEt.7aGKsV.WS410qPPYJ0C36jAS #bpwgcdgsvhwqeikj
+  default-password-decode: bpwgcdgsvhwqeikj
+  storage-file:
+    directory: ${EXPORT_REPORT_PATH:/upload/} #/upload/ #
+    font: font/
+  mail:
+    enable: true
+    add-emails-in-to-address: ketnguyen2906@gmail.com
+    add-emails-in-cc-address:
+
+
