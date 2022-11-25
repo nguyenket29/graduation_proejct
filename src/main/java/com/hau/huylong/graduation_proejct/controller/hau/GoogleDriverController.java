@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -21,7 +22,6 @@ import java.security.GeneralSecurityException;
 @RestController
 @RequestMapping("/google-driver")
 @AllArgsConstructor
-@CrossOrigin
 @Slf4j
 public class GoogleDriverController {
     private final GoogleDriverFile googleDriveFileService;
@@ -68,7 +68,7 @@ public class GoogleDriverController {
     @GetMapping("/download/file/{id}")
     public ResponseEntity<APIResponse<Void>> downloadFile(@PathVariable String id, HttpServletResponse response)
             throws IOException, GeneralSecurityException {
-        googleDriveFileService.downloadFile(id, response.getOutputStream());
+        googleDriveFileService.downloadFile(id, response.getOutputStream(), response);
         return ResponseEntity.ok(APIResponse.success());
     }
 

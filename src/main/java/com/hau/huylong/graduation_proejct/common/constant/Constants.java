@@ -1,5 +1,7 @@
 package com.hau.huylong.graduation_proejct.common.constant;
 
+import java.util.List;
+
 public class Constants {
     public static final String ANONYMOUS = "Anonymous";
     public static final String ADMIN = "ADMIN";
@@ -26,6 +28,9 @@ public class Constants {
             REMIND, REPLY
         }
     }
+
+    public static final List<String> EXTENTIONS = List.of("doc", "docx", "xls",
+            "pdf", "png", "jpg", "jpeg", "pptx", "ppt", "xlsm", "xlsx");
 
     public static final String ATTRIBUTE_DELIMITER = "#_@_@_#";
     public static final String FORMAT_DATE = "dd/MM/YYYY";

@@ -47,6 +47,12 @@ public class GoogleFileManager {
         return result.getFiles();
     }
 
+    //Get File By Id
+    public File getFileById(String id) throws GeneralSecurityException, IOException {
+        File file = googleDriverConfig.getInstance().files().get(id).execute();
+        return file;
+    }
+
     // Download file by id
     public void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException {
         if (id != null) {
