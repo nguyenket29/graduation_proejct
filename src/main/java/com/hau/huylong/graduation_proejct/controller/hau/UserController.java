@@ -5,6 +5,7 @@ import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.service.UserService;
+import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
+@Api(value = "API tài khoản")
 public class UserController  {
     private final UserService userService;
 
@@ -21,7 +23,7 @@ public class UserController  {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<APIResponse<UserDTO>> edit(@PathVariable Integer id, @RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(APIResponse.success(userService.edit(id, userDTO)));
+    public ResponseEntity<APIResponse<UserDTO>> edit(@PathVariable Integer id, @RequestBody UserRequest userRequest) {
+        return ResponseEntity.ok(APIResponse.success(userService.edit(id, userRequest)));
     }
 }

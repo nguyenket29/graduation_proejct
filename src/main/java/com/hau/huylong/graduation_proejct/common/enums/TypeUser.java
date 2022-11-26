@@ -1,2 +1,5 @@
-package com.hau.huylong.graduation_proejct.common.enums;public class TypeUser {
+package com.hau.huylong.graduation_proejct.common.enums;
+
+public enum TypeUser {
+    EMPLOYER, CANDIDATE
 }

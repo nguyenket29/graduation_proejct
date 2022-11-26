@@ -11,7 +11,7 @@ import java.time.Instant;
 @Data
 @Entity
 @Table(name = "user_info")
-public class UserInfoEntity extends BaseEntity {
+public class UserInfo extends BaseEntity {
     public static final class Gender {
         public static final short MALE = 0;
         public static final short FEMALE = 1;

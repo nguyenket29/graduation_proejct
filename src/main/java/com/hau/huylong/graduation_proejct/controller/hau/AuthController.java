@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -24,6 +25,12 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<APIResponse<TokenRefreshResponse>> tokenRefresh(@RequestBody TokenRefreshRequest request) {
         return ResponseEntity.ok(APIResponse.success(authService.refreshToken(request)));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<APIResponse<Void>> forgotPassword(@RequestBody PasswordDTO passwordDTO, HttpServletRequest request) throws MessagingException {
+        authService.forgotPassword(passwordDTO.getEmail(), request);
+        return ResponseEntity.ok(APIResponse.success());
     }
 
     @PostMapping("/update-password")
@@ -43,7 +50,7 @@ public class AuthController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<APIResponse<UserResponse>> getAccount() {
+    public ResponseEntity<APIResponse<UserResponse>> getAccountInfo() {
         return ResponseEntity.ok(APIResponse.success(authService.getInfo()));
     }
 

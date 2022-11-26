@@ -15,7 +15,7 @@ public interface RoleReps extends JpaRepository<Role, Integer> {
     Optional<Role> findByCode(String code);
     @Query("SELECT r FROM Role r")
     Page<Role> search(Pageable pageable);
-
     @Query("SELECT r FROM Role r WHERE (COALESCE(:codes, NULL) IS NULL OR r.code IN :codes)")
     List<Role> findByCodes(List<String> codes);
+    List<Role> findByIdIn(List<Integer> roleIds);
 }

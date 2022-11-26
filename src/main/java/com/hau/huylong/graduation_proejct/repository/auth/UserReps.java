@@ -1,6 +1,7 @@
 package com.hau.huylong.graduation_proejct.repository.auth;
 
 import com.hau.huylong.graduation_proejct.entity.auth.User;
+import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +18,7 @@ public interface UserReps extends JpaRepository<User, Integer> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     @Query("SELECT u FROM User u")
-    Page<User> search(Pageable pageable);
+    Page<User> search(UserRequest request, Pageable pageable);
 
     @Query("SELECT u FROM User u WHERE (COALESCE(:ids, NULL) IS NULL OR u.id IN :ids)")
     List<User> findByIds(List<Integer> ids);

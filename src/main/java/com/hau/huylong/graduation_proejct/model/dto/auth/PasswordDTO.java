@@ -11,4 +11,6 @@ public class PasswordDTO {
     private  String token;
 
     private String newPassword;
+
+    private String email;
 }

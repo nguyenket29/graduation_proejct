@@ -6,9 +6,11 @@ import com.hau.huylong.graduation_proejct.common.util.AuthorityUtil;
 import com.hau.huylong.graduation_proejct.common.util.JwtTokenUtil;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
+import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
 import com.hau.huylong.graduation_proejct.model.dto.auth.RefreshTokenDTO;
 import com.hau.huylong.graduation_proejct.model.request.LoginRequest;
 import com.hau.huylong.graduation_proejct.model.response.JwtResponse;
+import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.service.RefreshTokenService;
 import org.springframework.http.HttpStatus;
@@ -37,12 +39,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserInfoReps userInfoReps;
     private final JwtTokenUtil tokenUtil;
     private final UserReps userReps;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager, BCryptPasswordEncoder bCryptPasswordEncoder,
-                                   JwtTokenUtil tokenUtil, RefreshTokenService refreshTokenService, UserReps userReps) {
+                                   UserInfoReps userInfoReps, JwtTokenUtil tokenUtil, RefreshTokenService refreshTokenService, UserReps userReps) {
         this.authenticationManager = authenticationManager;
+        this.userInfoReps = userInfoReps;
         this.refreshTokenService = refreshTokenService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.tokenUtil = tokenUtil;
@@ -78,12 +82,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         CustomUser user = (CustomUser) authResult.getPrincipal();
         User userEntity = userReps.findByUsernameAndStatus(user.getUsername(), User.Status.ACTIVE)
                 .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found"));
+        UserInfo userInfo = userInfoReps.findByUserId(userEntity.getId())
+                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found."));
+
         Set<String> authorities = new HashSet<>();
         AuthorityUtil.authorityListToSet(user.getAuthorities()).forEach(au -> {
             authorities.add("ROLE_".concat(au));
         });
-        user.setFullName(userEntity.getFullName());
-        user.setAvatar(userEntity.getAvatar());
+        user.setFullName(userInfo.getFullName());
+        user.setAvatar(userInfo.getAvatar());
 
         Optional<RefreshTokenDTO> refreshToken = refreshTokenService.findByUserId(user.getId());
         JwtResponse tokenResponse = null;

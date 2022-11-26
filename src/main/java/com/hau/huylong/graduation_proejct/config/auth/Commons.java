@@ -7,6 +7,8 @@ public class Commons {
     public static final String REFRESH_TOKEN = "/refresh-token";
     public static final String ACTIVE_URL = "/activation";
     public static final String SIGN_UP_URL = "/sign-up";
+    public static final String FORGOT_PASS = "/forgot-password";
+    public static final String UPDATE_PASS = "/update-password";
     public static final String AUTH_HEADER = "Authorization";
     public static final String Refresh_Token = "RefreshToken";
     public static final String TOKEN_PREFIX = "Bearer ";
@@ -15,7 +17,8 @@ public class Commons {
     public static final String DOWN_FILE_GG_DRIVER = "/google-driver/**";
     public static final String DEFAULT_ROLE = "DEFAULT";
 
-    public static final String[] PUBLIC_URLs = new String[]{LOGIN_URL, REFRESH_TOKEN, SIGN_UP_URL, ACTIVE_URL, "/", DOWN_FILE_GG_DRIVER};
+    public static final String[] PUBLIC_URLs = new String[]{LOGIN_URL, REFRESH_TOKEN, SIGN_UP_URL,
+            ACTIVE_URL, "/", DOWN_FILE_GG_DRIVER, FORGOT_PASS, UPDATE_PASS};
 
     public static String jwtSubject(User user) {
         return user.getUsername();

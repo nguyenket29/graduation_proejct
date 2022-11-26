@@ -1,20 +1,18 @@
 package com.hau.huylong.graduation_proejct.service.impl;
 
+import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.AuthorityUtil;
-import com.hau.huylong.graduation_proejct.common.util.HashHelper;
 import com.hau.huylong.graduation_proejct.common.util.JwtTokenUtil;
 import com.hau.huylong.graduation_proejct.config.auth.Commons;
 import com.hau.huylong.graduation_proejct.entity.auth.*;
+import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.request.SignupRequest;
 import com.hau.huylong.graduation_proejct.model.request.TokenRefreshRequest;
 import com.hau.huylong.graduation_proejct.model.response.TokenRefreshResponse;
 import com.hau.huylong.graduation_proejct.model.response.UserResponse;
-import com.hau.huylong.graduation_proejct.repository.auth.RefreshTokenReps;
-import com.hau.huylong.graduation_proejct.repository.auth.RoleReps;
-import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
-import com.hau.huylong.graduation_proejct.repository.auth.UserVerificationReps;
+import com.hau.huylong.graduation_proejct.repository.auth.*;
 import com.hau.huylong.graduation_proejct.service.*;
 import com.hau.huylong.graduation_proejct.service.mapper.RefreshTokenMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserMapper;
@@ -38,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.util.*;
 
-import static com.hau.huylong.graduation_proejct.common.constant.Constants.AES_SECRET;
 import static com.hau.huylong.graduation_proejct.common.enums.RoleEnums.Role.USER;
 
 @Service
@@ -56,7 +53,7 @@ public class AuthServiceimpl implements AuthService {
     private final UserVerificationReps userVerificationReps;
     private final RoleReps roleReps;
     private final UserService userService;
-
+    private final UserInfoReps userInfoReps;
     private final ResetPasswordTokenService resetPasswordTokenService;
 
     /**
@@ -71,6 +68,8 @@ public class AuthServiceimpl implements AuthService {
                 .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Refresh token not found."));
         User user = userReps.findById(refresh.getUserId())
                 .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found."));
+        UserInfo userInfo = userInfoReps.findByUserId(user.getId())
+                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found."));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
         Set<String> roles = new HashSet<>();
@@ -80,8 +79,8 @@ public class AuthServiceimpl implements AuthService {
         CustomUser customUser = new CustomUser(user.getUsername(), user.getPassword(), true,
                 true, true, true, authorities);
         customUser.setId(user.getId());
-        customUser.setFullName(user.getFullName());
-        customUser.setAvatar(user.getAvatar());
+        customUser.setFullName(userInfo.getFullName());
+        customUser.setAvatar(userInfo.getAvatar());
 
         String accessToken = tokenUtil.generateToken(customUser.getUsername(), roles,
                 customUser.getId(), customUser.getFullName(), customUser.getAvatar());
@@ -107,14 +106,32 @@ public class AuthServiceimpl implements AuthService {
     public UserResponse getInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        Optional<UserDTO> userDTO = userService.findByUsernameAndStatus(customUser.getUsername(),
-                User.Status.ACTIVE).map(userMapper::to);
-        if (userDTO.isPresent()) {
+        Optional<User> userOpt = userService.findByUsernameAndStatus(customUser.getUsername(), User.Status.ACTIVE);
+
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            UserInfo userInfo = userInfoReps.findByUserId(user.getId())
+                    .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found."));
+
             Set<String> roles = AuthorityUtil.authorityListToSet(customUser.getAuthorities());
-            return new UserResponse(userDTO.get().getId(), userDTO.get().getUsername(),
-                    userDTO.get().getFirstName(), userDTO.get().getLastName(),
-                    userDTO.get().getAddress(), userDTO.get().getStatus(), userDTO.get().getAvatar(),
-                    userDTO.get().getBirthday(), userDTO.get().getGender(), roles);
+
+            return UserResponse.builder()
+                    .id(userInfo.getUserId())
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .status(user.getMapStatus().get(user.getStatus()))
+                    .type(user.getType().name())
+                    .address(userInfo.getAddress())
+                    .avatar(userInfo.getAvatar())
+                    .town(userInfo.getTown())
+                    .authorities(roles)
+                    .fullName(userInfo.getFullName())
+                    .dateOfBirth(userInfo.getDateOfBirth())
+                    .gender(user.getMapGender().get(userInfo.getGender()))
+                    .phoneNumber(userInfo.getPhoneNumber())
+                    .marriageStatus(userInfo.getMarriageStatus())
+                    .build();
         }
         return null;
     }
@@ -173,10 +190,20 @@ public class AuthServiceimpl implements AuthService {
         User user = new User();
         user.setStatus(User.Status.WAITING);
         user.setUsername(signupRequest.getUsername());
-        user.setFirstName(signupRequest.getFirstName());
-        user.setLastName(signupRequest.getLastName());
         user.setEmail(signupRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+
+        if (signupRequest.getPassword() != null && signupRequest.getConfirmPassword() != null
+                && Objects.equals(signupRequest.getPassword(), signupRequest.getConfirmPassword())) {
+            user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
+        }
+
+        if (signupRequest.getType() != null) {
+            if (signupRequest.getType().equalsIgnoreCase("employer")) {
+                user.setType(TypeUser.EMPLOYER);
+            } else {
+                user.setType(TypeUser.CANDIDATE);
+            }
+        }
 
         //set role user for all account when register
         Set<Role> roles = new HashSet<>();
@@ -188,8 +215,11 @@ public class AuthServiceimpl implements AuthService {
         //create and save verification code if the user is saved
         userDTO.ifPresent(u -> {
             try {
+                UserInfo userInfo = new UserInfo();
+                userInfo.setUserId(u.getId());
                 String code = UUID.randomUUID().toString();
                 userVerificationService.save(userDTO.get().getId(), code);
+                userInfoReps.save(userInfo);
 
                 //send verify to email
                 emailService.sendMail(u, request);
@@ -279,13 +309,10 @@ public class AuthServiceimpl implements AuthService {
                     .build()
                     .toUriString();
 
-            //Encrypt token reset password
-            String tokenEncrypt = HashHelper.aesEncrypt(token, AES_SECRET);
-
             Map<String, Object> variables = new HashMap<>();
             String sub = "Email Reset Password !";
 
-            String start = org.apache.commons.lang3.StringUtils.join("<a href=", url , "/update-password?token=", tokenEncrypt, ">");
+            String start = org.apache.commons.lang3.StringUtils.join("<a href=", url , "/pages/update-password?token=", token, ">");
             String end = "</a>";
             String activeUrl = org.apache.commons.lang3.StringUtils.join("Click ", start, " here ", end, " to reset your password !");
             variables.put("url", activeUrl);
@@ -295,9 +322,9 @@ public class AuthServiceimpl implements AuthService {
 
     @Override
     public boolean updatePassword(String newPassword, String token, String oldPassword) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         if (token != null) {
-            String tokenDecrypt = HashHelper.aesEncrypt(token, AES_SECRET);
-            String rs = resetPasswordTokenService.validatePasswordResetToken(tokenDecrypt);
+            String rs = resetPasswordTokenService.validatePasswordResetToken(token);
 
             if (rs != null) {
                 throw APIException.from(HttpStatus.BAD_REQUEST).withMessage(rs);
@@ -308,7 +335,7 @@ public class AuthServiceimpl implements AuthService {
                 Optional<User> userOptional = userReps.findById(resetPasswordToken.get().getUserId());
                 if (userOptional.isPresent()) {
                     if (newPassword.equals(oldPassword)) {
-                        userOptional.get().setPassword(newPassword);
+                        userOptional.get().setPassword(passwordEncoder.encode(newPassword));
                     } else {
                         throw APIException.from(HttpStatus.BAD_REQUEST).withMessage("Mật khẩu không trùng khớp !");
                     }

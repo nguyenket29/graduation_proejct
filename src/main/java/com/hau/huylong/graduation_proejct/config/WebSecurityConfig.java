@@ -5,6 +5,7 @@ import com.hau.huylong.graduation_proejct.common.util.JwtTokenUtil;
 import com.hau.huylong.graduation_proejct.config.auth.Commons;
 import com.hau.huylong.graduation_proejct.config.auth.JWTAuthenticationFilter;
 import com.hau.huylong.graduation_proejct.config.auth.JWTAuthorizationFilter;
+import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.service.RefreshTokenService;
 import com.hau.huylong.graduation_proejct.service.UserService;
@@ -27,15 +28,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final RefreshTokenService refreshTokenService;
     private final UserService userService;
     private final EntryPointAuthenticationConfig entryPointConfig;
-
+    private final UserInfoReps userInfoReps;
     private final UserReps userReps;
 
     public WebSecurityConfig(JwtTokenUtil tokenUtil, RefreshTokenService refreshTokenService, UserService userService,
-                             EntryPointAuthenticationConfig entryPointConfig, UserReps userReps) {
+                             EntryPointAuthenticationConfig entryPointConfig, UserInfoReps userInfoReps, UserReps userReps) {
         this.tokenUtil = tokenUtil;
         this.refreshTokenService = refreshTokenService;
         this.userService = userService;
         this.entryPointConfig = entryPointConfig;
+        this.userInfoReps = userInfoReps;
         this.userReps = userReps;
     }
 
@@ -49,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().logout()
                 .and().csrf().disable()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(),
-                        bCryptPasswordEncoder(), tokenUtil, refreshTokenService, userReps))
+                        bCryptPasswordEncoder(), userInfoReps, tokenUtil, refreshTokenService, userReps))
                 .addFilter(new JWTAuthorizationFilter(authenticationManager(), userService))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().httpBasic().authenticationEntryPoint(entryPointConfig);
