@@ -7,7 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public interface AccountMapper {
     UserDTO to(User entity);
 
     @Mapping(target = "id", ignore = true)
