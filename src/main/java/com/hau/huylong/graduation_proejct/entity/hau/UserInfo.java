@@ -1,11 +1,10 @@
 package com.hau.huylong.graduation_proejct.entity.hau;
 
+import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.entity.BaseEntity;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
 
 @Data
@@ -44,4 +43,11 @@ public class UserInfo extends BaseEntity {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Column(name = "type")
+    @Enumerated(value = EnumType.STRING)
+    private TypeUser type;
+
+    @Column(name = "companyId")
+    private Long companyId;
 }

@@ -58,7 +58,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendMail(UserDTO userDTO, HttpServletRequest request) throws MessagingException {
         Optional<UserVerification> userVerification = userVerificationService.findByUserId(userDTO.getId());
         String url = ServletUriComponentsBuilder.fromRequestUri(request)
-                .replacePath(request.getContextPath())
+                .replacePath(request.getPathInfo())
                 .build()
                 .toUriString();
 

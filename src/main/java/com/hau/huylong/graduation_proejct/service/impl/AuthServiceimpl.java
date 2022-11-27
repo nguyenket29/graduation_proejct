@@ -6,6 +6,7 @@ import com.hau.huylong.graduation_proejct.common.util.AuthorityUtil;
 import com.hau.huylong.graduation_proejct.common.util.JwtTokenUtil;
 import com.hau.huylong.graduation_proejct.config.auth.Commons;
 import com.hau.huylong.graduation_proejct.entity.auth.*;
+import com.hau.huylong.graduation_proejct.entity.hau.Company;
 import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.request.SignupRequest;
@@ -13,6 +14,7 @@ import com.hau.huylong.graduation_proejct.model.request.TokenRefreshRequest;
 import com.hau.huylong.graduation_proejct.model.response.TokenRefreshResponse;
 import com.hau.huylong.graduation_proejct.model.response.UserResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.*;
+import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
 import com.hau.huylong.graduation_proejct.service.*;
 import com.hau.huylong.graduation_proejct.service.mapper.RefreshTokenMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserMapper;
@@ -54,6 +56,7 @@ public class AuthServiceimpl implements AuthService {
     private final UserService userService;
     private final UserInfoReps userInfoReps;
     private final ResetPasswordTokenService resetPasswordTokenService;
+    private final CompanyReps companyReps;
     private final String portFe;
 
     public AuthServiceimpl(UserReps userReps, RefreshTokenService refreshToken, UserMapper userMapper,
@@ -61,7 +64,7 @@ public class AuthServiceimpl implements AuthService {
                            UserVerificationService userVerificationService, EmailService emailService,
                            UserVerificationReps userVerificationReps, RoleReps roleReps,
                            UserService userService, UserInfoReps userInfoReps,
-                           ResetPasswordTokenService resetPasswordTokenService, @Value("${port-fe}") String portFe) {
+                           ResetPasswordTokenService resetPasswordTokenService, CompanyReps companyReps, @Value("${port-fe}") String portFe) {
         this.userReps = userReps;
         this.refreshToken = refreshToken;
         this.userMapper = userMapper;
@@ -75,6 +78,7 @@ public class AuthServiceimpl implements AuthService {
         this.userService = userService;
         this.userInfoReps = userInfoReps;
         this.resetPasswordTokenService = resetPasswordTokenService;
+        this.companyReps = companyReps;
         this.portFe = portFe;
     }
 
@@ -237,11 +241,27 @@ public class AuthServiceimpl implements AuthService {
         //create and save verification code if the user is saved
         userDTO.ifPresent(u -> {
             try {
-                UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(u.getId());
                 String code = UUID.randomUUID().toString();
                 userVerificationService.save(userDTO.get().getId(), code);
-                userInfoReps.save(userInfo);
+
+                if (u.getType().equalsIgnoreCase("employer")) {
+                    // thông tin cty
+                    Company company = new Company();
+                    company.setUserId(u.getId());
+                    companyReps.save(company);
+
+                    // thông tin người liên hệ
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.setCompanyId(company.getId());
+                    userInfo.setUserId(company.getUserId());
+                    userInfo.setType(TypeUser.EMPLOYER);
+                    userInfoReps.save(userInfo);
+                } else {
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.setUserId(u.getId());
+                    userInfo.setType(TypeUser.CANDIDATE);
+                    userInfoReps.save(userInfo);
+                }
 
                 //send verify to email
                 emailService.sendMail(u, request);
@@ -327,7 +347,7 @@ public class AuthServiceimpl implements AuthService {
         String token = UUID.randomUUID().toString();
         if (resetPasswordTokenService.createTokenResetPassword(userDto.getId(), token)) {
             String url = ServletUriComponentsBuilder.fromRequestUri(request)
-                    .replacePath(request.getContextPath())
+                    .replacePath(request.getPathInfo())
                     .build()
                     .toUriString();
 

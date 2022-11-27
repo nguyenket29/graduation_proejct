@@ -1,4 +1,4 @@
-package com.hau.huylong.graduation_proejct.repository.hau;
+package com.hau.huylong.graduation_proejct.repository.auth;
 
 import com.hau.huylong.graduation_proejct.entity.auth.ResetPasswordToken;
 import org.springframework.data.repository.CrudRepository;

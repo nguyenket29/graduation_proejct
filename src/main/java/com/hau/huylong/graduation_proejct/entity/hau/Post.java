@@ -11,9 +11,9 @@ import java.time.Instant;
 @Data
 @Entity
 @Table(name = "posts")
-public class PostEntity extends BaseEntity {
-    @Column(name = "industry")
-    private String industry;
+public class Post extends BaseEntity {
+    @Column(name = "industry_id")
+    private Long industryId;
 
     @Column(name = "recruitment_area")
     private String recruitmentArea;
@@ -33,6 +33,7 @@ public class PostEntity extends BaseEntity {
     @Column(name = "probationary_period")
     private Instant probationaryPeriod;
 
+    //số lượng tuyển
     @Column(name = "number_of_recruits")
     private Integer numberOfRecruits;
 
@@ -44,8 +45,11 @@ public class PostEntity extends BaseEntity {
     @Column(name = "recruitment_experience")
     private String recruitmentExperience;
 
-    @Column(name = "salary")
-    private Double salary;
+    @Column(name = "salary_min")
+    private Double salaryMin;
+
+    @Column(name = "salary_max")
+    private Double salaryMax;
 
     @Column(name = "level")
     private String level;

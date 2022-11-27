@@ -2,7 +2,7 @@ package com.hau.huylong.graduation_proejct.service.impl;
 
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.entity.auth.ResetPasswordToken;
-import com.hau.huylong.graduation_proejct.repository.hau.ResetPasswordTokenReps;
+import com.hau.huylong.graduation_proejct.repository.auth.ResetPasswordTokenReps;
 import com.hau.huylong.graduation_proejct.service.ResetPasswordTokenService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

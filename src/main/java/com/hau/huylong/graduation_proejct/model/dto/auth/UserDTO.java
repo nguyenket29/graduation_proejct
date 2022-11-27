@@ -1,5 +1,6 @@
 package com.hau.huylong.graduation_proejct.model.dto.auth;
 
+import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,5 +18,6 @@ public class UserDTO {
     private String email;
     private String type;
     private UserInfoDTO userInfoDTO;
+    private CompanyDTO companyDTO;
     private List<String> listRole;
 }

@@ -5,15 +5,19 @@ import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.Role;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
+import com.hau.huylong.graduation_proejct.entity.hau.Company;
 import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.RoleReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
+import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
 import com.hau.huylong.graduation_proejct.service.UserService;
+import com.hau.huylong.graduation_proejct.service.mapper.CompanyMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserInfoMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserMapper;
 import io.swagger.models.auth.In;
@@ -37,6 +41,8 @@ public class UserServiceImpl implements UserService {
     private final RoleReps roleReps;
     private final UserInfoReps userInfoReps;
     private final UserInfoMapper userInfoMapper;
+    private final CompanyReps companyReps;
+    private final CompanyMapper companyMapper;
 
     /**
      * Tìm kiếm người dùng theo username và status
@@ -95,13 +101,6 @@ public class UserServiceImpl implements UserService {
         // update account and roles to user
         User user = userOptional.get();
         user.setEmail(userRequest.getEmail());
-        if (userRequest.getType() != null) {
-            if (userRequest.getType().equalsIgnoreCase("employer")) {
-                user.setType(TypeUser.EMPLOYER);
-            } else {
-                user.setType(TypeUser.CANDIDATE);
-            }
-        }
         user.setStatus(userRequest.getStatus());
         user.setUsername(userRequest.getUsername());
 
@@ -111,23 +110,61 @@ public class UserServiceImpl implements UserService {
             user.setRoles(roleSet);
         }
 
-        // update user info
+        // update user info or company info
         UserInfo userInfo = userInfoReps.findByUserId(user.getId())
-                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Username not found."));
-        userInfo.setGender(userRequest.getGender());
-        userInfo.setAddress(userRequest.getAddress());
-        userInfo.setAvatar(userRequest.getAvatar());
-        userInfo.setTown(userRequest.getTown());
-        userInfo.setDateOfBirth(userRequest.getDateOfBirth());
-        userInfo.setFullName(userRequest.getFullName());
-        userInfo.setMarriageStatus(userRequest.getMarriageStatus());
-        userInfo.setPhoneNumber(userRequest.getPhoneNumber());
+                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("User not found."));
+        Company company = companyReps.findByUserId(user.getId())
+                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("Company not found."));
+        UserInfo userContactInfo = userInfoReps.findByCompanyId(company.getId())
+                .orElseThrow(() -> APIException.from(HttpStatus.NOT_FOUND).withMessage("User not found."));
+
+        if (userRequest.getType() != null) {
+            if (userRequest.getType().equalsIgnoreCase("employer")) {
+                // set person contact info
+                userContactInfo.setFullName(userRequest.getUserInfoRequest().getFullName());
+                userContactInfo.setPhoneNumber(userRequest.getUserInfoRequest().getPhoneNumber());
+                userContactInfo.setAddress(userRequest.getUserInfoRequest().getAddress());
+
+                // set company info
+                company.setAddress(userRequest.getCompanyRequest().getAddress());
+                company.setName(userRequest.getCompanyRequest().getName());
+                company.setPhoneNumber(userRequest.getCompanyRequest().getPhoneNumber());
+                company.setTaxCode(userRequest.getCompanyRequest().getTaxCode());
+                company.setEmployeeNumber(userRequest.getCompanyRequest().getEmployeeNumber());
+                company.setFieldOfActivity(userRequest.getCompanyRequest().getFieldOfActivity());
+                user.setType(TypeUser.EMPLOYER);
+            } else {
+                userInfo.setGender(userRequest.getUserInfoRequest().getGender());
+                userInfo.setAddress(userRequest.getUserInfoRequest().getAddress());
+                userInfo.setAvatar(userRequest.getUserInfoRequest().getAvatar());
+                userInfo.setTown(userRequest.getUserInfoRequest().getTown());
+                userInfo.setDateOfBirth(userRequest.getUserInfoRequest().getDateOfBirth());
+                userInfo.setFullName(userRequest.getUserInfoRequest().getFullName());
+                userInfo.setMarriageStatus(userRequest.getUserInfoRequest().getMarriageStatus());
+                userInfo.setPhoneNumber(userRequest.getUserInfoRequest().getPhoneNumber());
+                user.setType(TypeUser.CANDIDATE);
+            }
+        }
 
         UserDTO userDTO = userMapper.to(userReps.save(user));
-        UserInfoDTO userInfoDTO = userInfoMapper.to(userInfoReps.save(userInfo));
 
-        if (Objects.equals(userInfoDTO.getUserId(), userDTO.getId())) {
+        CompanyDTO companyDto = null;
+        UserInfoDTO userInfoDTO = null;
+        if (userRequest.getType().equalsIgnoreCase("employer")) {
+            userInfoDTO = userInfoMapper.to(userInfoReps.save(userContactInfo));
+            companyDto = companyMapper.to(companyReps.save(company));
+        } else {
+            userInfoDTO = userInfoMapper.to(userInfoReps.save(userInfo));
+        }
+
+
+        if (userInfoDTO != null && Objects.equals(userInfoDTO.getUserId(), userDTO.getId())) {
             userDTO.setUserInfoDTO(userInfoDTO);
+        } else if (companyDto != null && Objects.equals(companyDto.getUserId(), userDTO.getId())) {
+            userDTO.setCompanyDTO(companyDto);
+            if (userInfoDTO != null && Objects.equals(companyDto.getId(), userInfoDTO.getCompanyId())) {
+                userDTO.setUserInfoDTO(userInfoDTO);
+            }
         }
 
         return userDTO;

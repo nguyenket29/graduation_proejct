@@ -1,9 +1,7 @@
 package com.hau.huylong.graduation_proejct.model.request;
 
-import lombok.Builder;
 import lombok.Data;
 
-import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -13,13 +11,7 @@ public class UserRequest extends SearchRequest{
     private Short status;
     private String email;
     private String type;
-    private String fullName;
-    private String avatar;
-    private Instant dateOfBirth;
-    private String town;
-    private short gender;
-    private String marriageStatus;
-    private String address;
-    private String phoneNumber;
+    private SearchUserInfoRequest userInfoRequest;
+    private SearchCompanyRequest companyRequest;
     private List<String> listRole;
 }
