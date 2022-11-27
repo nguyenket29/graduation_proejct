@@ -40,6 +40,8 @@ inventory:
   logs:
     path: ./logs/development
 
+port-fe: 8080
+
 application:
   default-password: $2a$12$CVy4btq466w7HPQbLx0eNetqANEt.7aGKsV.WS410qPPYJ0C36jAS #bpwgcdgsvhwqeikj
   default-password-decode: bpwgcdgsvhwqeikj

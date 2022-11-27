@@ -16,8 +16,8 @@ import com.hau.huylong.graduation_proejct.repository.auth.*;
 import com.hau.huylong.graduation_proejct.service.*;
 import com.hau.huylong.graduation_proejct.service.mapper.RefreshTokenMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserMapper;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -40,7 +40,6 @@ import static com.hau.huylong.graduation_proejct.common.enums.RoleEnums.Role.USE
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class AuthServiceimpl implements AuthService {
     private final UserReps userReps;
     private final RefreshTokenService refreshToken;
@@ -55,6 +54,29 @@ public class AuthServiceimpl implements AuthService {
     private final UserService userService;
     private final UserInfoReps userInfoReps;
     private final ResetPasswordTokenService resetPasswordTokenService;
+    private final String portFe;
+
+    public AuthServiceimpl(UserReps userReps, RefreshTokenService refreshToken, UserMapper userMapper,
+                           JwtTokenUtil tokenUtil, RefreshTokenReps refreshTokenReps, RefreshTokenMapper refreshTokenMapper,
+                           UserVerificationService userVerificationService, EmailService emailService,
+                           UserVerificationReps userVerificationReps, RoleReps roleReps,
+                           UserService userService, UserInfoReps userInfoReps,
+                           ResetPasswordTokenService resetPasswordTokenService, @Value("${port-fe}") String portFe) {
+        this.userReps = userReps;
+        this.refreshToken = refreshToken;
+        this.userMapper = userMapper;
+        this.tokenUtil = tokenUtil;
+        this.refreshTokenReps = refreshTokenReps;
+        this.refreshTokenMapper = refreshTokenMapper;
+        this.userVerificationService = userVerificationService;
+        this.emailService = emailService;
+        this.userVerificationReps = userVerificationReps;
+        this.roleReps = roleReps;
+        this.userService = userService;
+        this.userInfoReps = userInfoReps;
+        this.resetPasswordTokenService = resetPasswordTokenService;
+        this.portFe = portFe;
+    }
 
     /**
      * Lấy lại access token khi token hết hạn
@@ -312,7 +334,7 @@ public class AuthServiceimpl implements AuthService {
             Map<String, Object> variables = new HashMap<>();
             String sub = "Email Reset Password !";
 
-            String start = org.apache.commons.lang3.StringUtils.join("<a href=", url , "/pages/update-password?token=", token, ">");
+            String start = org.apache.commons.lang3.StringUtils.join("<a href=", url, ":", portFe , "/pages/update-password?token=", token, ">");
             String end = "</a>";
             String activeUrl = org.apache.commons.lang3.StringUtils.join("Click ", start, " here ", end, " to reset your password !");
             variables.put("url", activeUrl);
