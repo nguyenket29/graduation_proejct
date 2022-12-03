@@ -28,11 +28,11 @@ public class RecruitmentProfileDTO {
     // mục tiêu nghề nghiệp
     private String careerTarget;
     // Kinh nghiệm làm việc
-    private WorkExperienceDTO workExperience;
+    private String workExperience;
     // Thông tin học vấn
-    private AcademyInfoDTO academyInfo;
+    private String academyInfo;
     // Ngoại ngữ
-    private ForeignLanguageDTO foreignLanguage;
+    private String foreignLanguage;
     // Tin học
-    private OfficeInfoDTO officeInfo;
+    private String officeInfo;
 }
