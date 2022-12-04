@@ -246,7 +246,7 @@ public class AuthServiceimpl implements AuthService {
                 String code = UUID.randomUUID().toString();
                 userVerificationService.save(userDTO.get().getId(), code);
 
-                if (u.getType().equalsIgnoreCase("employer")) {
+                if (u.getType() != null && u.getType().equalsIgnoreCase("employer")) {
                     // thông tin cty
                     Company company = new Company();
                     company.setUserId(u.getId());

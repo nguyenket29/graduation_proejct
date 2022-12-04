@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class RecruitmentProfileDTO {
+    // vị trí ứng tuyển
     private String positionOffer;
     //cấp bậc mong muốn
     private String levelDesire;
@@ -22,17 +23,17 @@ public class RecruitmentProfileDTO {
     // Nơi làm việc
     private String workAddress;
     // Thông tin người dùng
-    private String userId;
+    private Long userId;
     // Địa chỉ
     private String address;
     // mục tiêu nghề nghiệp
     private String careerTarget;
     // Kinh nghiệm làm việc
-    private String workExperience;
+    private WorkExperienceDTO workExperienceDTO;
     // Thông tin học vấn
-    private String academyInfo;
+    private AcademyInfoDTO academyInfoDTO;
     // Ngoại ngữ
-    private String foreignLanguage;
+    private ForeignLanguageDTO foreignLanguageDTO;
     // Tin học
-    private String officeInfo;
+    private OfficeInfoDTO officeInfoDTO;
 }

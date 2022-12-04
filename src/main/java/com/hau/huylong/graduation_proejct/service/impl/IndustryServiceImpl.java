@@ -1,5 +1,8 @@
 package com.hau.huylong.graduation_proejct.service.impl;
 
+import com.hau.huylong.graduation_proejct.common.exception.APIException;
+import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
+import com.hau.huylong.graduation_proejct.entity.hau.Industries;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
 import com.hau.huylong.graduation_proejct.model.request.SearchIndustryRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
@@ -8,7 +11,12 @@ import com.hau.huylong.graduation_proejct.service.IndustryService;
 import com.hau.huylong.graduation_proejct.service.mapper.IndustryMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -19,26 +27,51 @@ public class IndustryServiceImpl implements IndustryService {
 
     @Override
     public IndustryDTO save(IndustryDTO industryDTO) {
-        return null;
+        return industryMapper.to(industryReps.save(industryMapper.from(industryDTO)));
     }
 
     @Override
     public IndustryDTO edit(Long id, IndustryDTO industryDTO) {
-        return null;
+        Optional<Industries> industriesOptional = industryReps.findById(id);
+
+        if (industriesOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy ngành nghề");
+        }
+
+        Industries industries = industriesOptional.get();
+        String codeOld = industries.getCode();
+        industryMapper.copy(industryDTO, industries);
+        industries.setCode(codeOld);
+
+        return industryMapper.to(industries);
     }
 
     @Override
     public void delete(Long id) {
+        Optional<Industries> industriesOptional = industryReps.findById(id);
 
+        if (industriesOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy ngành nghề");
+        }
+
+        industryReps.delete(industriesOptional.get());
     }
 
     @Override
     public IndustryDTO findById(Long id) {
-        return null;
+        Optional<Industries> industriesOptional = industryReps.findById(id);
+
+        if (industriesOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy ngành nghề");
+        }
+
+        return industryMapper.to(industriesOptional.get());
     }
 
     @Override
     public PageDataResponse<IndustryDTO> getAll(SearchIndustryRequest request) {
-        return null;
+        Pageable pageable = PageableUtils.of(request.getPage(), request.getSize());
+        Page<IndustryDTO> page = industryReps.search(request, pageable).map(industryMapper::to);
+        return PageDataResponse.of(page);
     }
 }

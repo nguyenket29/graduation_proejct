@@ -14,5 +14,7 @@ public interface UserInfoMapper {
     UserInfo from(UserInfoDTO dto);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "companyId", ignore = true)
     UserInfo copy(UserInfoDTO dto, @MappingTarget UserInfo entity);
 }

@@ -40,7 +40,7 @@ public class RecruitmentProfile extends BaseEntity {
     private String workAddress;
     // Thông tin người dùng
     @Column(name = "user_id")
-    private String userId;
+    private Long userId;
     // Địa chỉ
     @Column(name = "address")
     private String address;
