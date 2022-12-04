@@ -20,8 +20,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ketmax121@gmail.com
-    password: bpwgcdgsvhwqeikj
+    username: longnguyenhuy1402@gmail.com
+    password: owaiyvxoemmjxdhi
     properties:
       mail:
         transport:
@@ -47,14 +47,14 @@ inventory:
     path: ./logs/development
 
 application:
-  default-password: $2a$12$CVy4btq466w7HPQbLx0eNetqANEt.7aGKsV.WS410qPPYJ0C36jAS #bpwgcdgsvhwqeikj
-  default-password-decode: bpwgcdgsvhwqeikj
+  default-password: $2a$12$VDjPUakwg8oMceR4dtvlvOCWrQKZpEnSjNSnN3VSrbLO.Jnq4Ua46 #$2a$12$CVy4btq466w7HPQbLx0eNetqANEt.7aGKsV.WS410qPPYJ0C36jAS #bpwgcdgsvhwqeikj
+  default-password-decode: owaiyvxoemmjxdhi #bpwgcdgsvhwqeikj
   storage-file:
     directory: ${EXPORT_REPORT_PATH:/upload/} #/upload/ #
     font: font/
   mail:
     enable: true
-    add-emails-in-to-address: ketnguyen2906@gmail.com
+    add-emails-in-to-address: longnguyenhuy1402@gmail.com
     add-emails-in-cc-address:
 
 
