@@ -3,9 +3,15 @@ package com.hau.huylong.graduation_proejct.model.dto.hau;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Data
 public class PostDTO {
+    private Long id;
+    private String createdBy;
+    private Date created;
+    private String updatedBy;
+    private Date updated;
     private Long industryId;
     private String recruitmentArea;
     private String recruitmentGender;
@@ -23,4 +29,6 @@ public class PostDTO {
     private String jobRequirements;
     private String benefits;
     private Long companyId;
+    private CompanyDTO companyDTO;
+    private IndustryDTO industryDTO;
 }

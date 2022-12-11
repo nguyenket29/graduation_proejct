@@ -2,8 +2,15 @@ package com.hau.huylong.graduation_proejct.model.dto.hau;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class RecruitmentProfileDTO {
+    private Long id;
+    private String createdBy;
+    private Date created;
+    private String updatedBy;
+    private Date updated;
     // vị trí ứng tuyển
     private String positionOffer;
     //cấp bậc mong muốn

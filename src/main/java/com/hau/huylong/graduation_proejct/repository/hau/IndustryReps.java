@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IndustryReps extends JpaRepository<Industries, Long> {
     @Query("select i from Industries i " +
@@ -15,4 +17,6 @@ public interface IndustryReps extends JpaRepository<Industries, Long> {
             " AND (:#{#request.name} IS NULL OR i.name LIKE %:#{#request.name}%) " +
             " ORDER BY i.id desc ")
     Page<Industries> search(SearchIndustryRequest request, Pageable pageable);
+
+    List<Industries> findByIdIn(List<Long> industryIds);
 }

@@ -3,6 +3,7 @@ package com.hau.huylong.graduation_proejct.service.impl;
 import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
+import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.Role;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
 import com.hau.huylong.graduation_proejct.entity.hau.Company;
@@ -16,6 +17,7 @@ import com.hau.huylong.graduation_proejct.repository.auth.RoleReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
+import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import com.hau.huylong.graduation_proejct.service.mapper.CompanyMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.UserInfoMapper;
@@ -27,7 +29,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final UserInfoMapper userInfoMapper;
     private final CompanyReps companyReps;
     private final CompanyMapper companyMapper;
+    private final GoogleDriverFile googleDriverFile;
 
     /**
      * Tìm kiếm người dùng theo username và status
@@ -182,6 +188,58 @@ public class UserServiceImpl implements UserService {
                     userReps.saveAll(users);
                 }
             }
+        }
+    }
+
+    @Override
+    public void deleteUser(List<Integer> userIds) {
+        if (userIds != null && !userIds.isEmpty()) {
+            List<User> users = userReps.findByIds(userIds);
+            List<UserInfo> userInfos = userInfoReps.findByUserIdIn(userIds);
+            if (!users.isEmpty() && !userInfos.isEmpty()) {
+                userReps.deleteAll(users);
+                userInfoReps.deleteAll(userInfos);
+            }
+        }
+    }
+
+    @Override
+    public List<UserDTO> findById(List<Integer> userIds) {
+        if (userIds != null && !userIds.isEmpty()) {
+            List<UserDTO> users = userReps.findByIds(userIds)
+                    .stream().map(userMapper::to).collect(Collectors.toList());
+            Map<Integer, UserInfoDTO> userInfos = userInfoReps.findByUserIdIn(userIds)
+                    .stream().map(userInfoMapper::to).collect(Collectors.toMap(UserInfoDTO::getUserId, u -> u));
+
+            if (!users.isEmpty()) {
+                users.forEach(u -> {
+                    if (!userInfos.isEmpty() && userInfos.containsKey(u.getId())) {
+                        u.setUserInfoDTO(userInfos.get(u.getId()));
+                    }
+                });
+            }
+
+            return users;
+        }
+        return null;
+    }
+
+    @Override
+    public void uploadAvatar(MultipartFile file, String filePath, boolean isPublic) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+        String fileId = googleDriverFile.uploadFile(file, filePath, isPublic);
+        if (fileId != null) {
+            Optional<UserInfo> userInfoOptional = userInfoReps.findByUserId(user.getId());
+
+            if (userInfoOptional.isEmpty()) {
+                throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy người dùng");
+            }
+
+            UserInfo userInfo = userInfoOptional.get();
+            userInfo.setAvatar(fileId);
+
+            userInfoReps.save(userInfo);
         }
     }
 }

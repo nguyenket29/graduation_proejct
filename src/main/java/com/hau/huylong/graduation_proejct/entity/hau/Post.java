@@ -12,6 +12,9 @@ import java.time.Instant;
 @Entity
 @Table(name = "posts")
 public class Post extends BaseEntity {
+    @Column(name = "company_id")
+    private Long companyId;
+
     @Column(name = "industry_id")
     private Long industryId;
 

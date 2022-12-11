@@ -1,6 +1,7 @@
 package com.hau.huylong.graduation_proejct.service.impl;
 
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
+import com.hau.huylong.graduation_proejct.common.util.BeanUtil;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.entity.hau.Industries;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
@@ -39,9 +40,7 @@ public class IndustryServiceImpl implements IndustryService {
         }
 
         Industries industries = industriesOptional.get();
-        String codeOld = industries.getCode();
-        industryMapper.copy(industryDTO, industries);
-        industries.setCode(codeOld);
+        BeanUtil.copyNonNullProperties(industryDTO, industries);
 
         return industryMapper.to(industries);
     }
