@@ -26,7 +26,7 @@ public class SearchRecruitmentProfileRequest extends SearchRequest {
     // Nơi làm việc
     private String workAddress;
     // Thông tin người dùng
-    private String userId;
+    private Long userId;
     // Địa chỉ
     private String address;
     // mục tiêu nghề nghiệp

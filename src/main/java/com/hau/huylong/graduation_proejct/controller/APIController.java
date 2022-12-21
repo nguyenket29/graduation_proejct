@@ -1,5 +1,6 @@
 package com.hau.huylong.graduation_proejct.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ public abstract class APIController<DTO, SR> {
 
     @CrossOrigin
     @PostMapping
-    public abstract ResponseEntity<APIResponse<DTO>> save(@RequestBody DTO dto);
+    public abstract ResponseEntity<APIResponse<DTO>> save(@RequestBody DTO dto) throws JsonProcessingException;
 
     @CrossOrigin
     @PutMapping("/{id}")
