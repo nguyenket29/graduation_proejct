@@ -47,6 +47,7 @@ public class RecruitmentProfileDTO {
     private String foreignLanguage;
     // Tin học
     private String officeInfo;
+    private String fileId;
 
     // Kinh nghiệm làm việc
     private WorkExperienceDTO workExperienceDTO;
