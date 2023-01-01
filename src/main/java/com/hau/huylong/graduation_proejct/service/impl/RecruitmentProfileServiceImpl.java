@@ -44,7 +44,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     }
 
     @Override
-    public RecruitmentProfileDTO edit(Long id, RecruitmentProfileDTO recruitmentProfileDTO) throws JsonProcessingException {
+    public RecruitmentProfileDTO edit(Long id, RecruitmentProfileDTO recruitmentProfileDTO) {
         ObjectMapper mapper = new ObjectMapper();
         Optional<RecruitmentProfile> recruitmentProfileOptional = recruitmentProfileReps.findById(id);
 
