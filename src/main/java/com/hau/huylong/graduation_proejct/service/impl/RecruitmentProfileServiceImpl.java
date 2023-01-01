@@ -145,4 +145,43 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public RecruitmentProfileDTO findByUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Optional<RecruitmentProfile> recruitmentProfileOptional = recruitmentProfileReps.findByUserId(customUser.getId().longValue());
+
+        if (recruitmentProfileOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        }
+
+        RecruitmentProfileDTO recruitmentProfileDTO = recruitmentProfileMapper.to(recruitmentProfileOptional.get());
+
+        setDTOProfile(objectMapper, recruitmentProfileDTO);
+
+        return recruitmentProfileDTO;
+    }
+
+    @Override
+    public void activeSearch(boolean check) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+        Optional<RecruitmentProfile> recruitmentProfileOptional = recruitmentProfileReps.findByUserId(customUser.getId().longValue());
+
+        if (recruitmentProfileOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        }
+
+        if (check) {
+            recruitmentProfileOptional.get().setPermissionSearch(true);
+        } else {
+            recruitmentProfileOptional.get().setPermissionSearch(false);
+        }
+
+        recruitmentProfileReps.save(recruitmentProfileOptional.get());
+    }
 }

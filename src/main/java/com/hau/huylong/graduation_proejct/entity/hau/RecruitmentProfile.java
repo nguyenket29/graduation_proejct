@@ -65,4 +65,7 @@ public class RecruitmentProfile extends BaseEntity {
     @Column(name = "office_info")
     @Lob
     private String officeInfo;
+
+    @Column(name = "permission_search")
+    private boolean permissionSearch;
 }

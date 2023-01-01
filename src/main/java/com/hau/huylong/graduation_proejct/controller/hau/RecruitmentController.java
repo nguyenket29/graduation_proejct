@@ -43,6 +43,17 @@ public class RecruitmentController {
         return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.findById(id)));
     }
 
+    @GetMapping("/user-id")
+    public ResponseEntity<APIResponse<RecruitmentProfileDTO>> findByUserId() {
+        return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.findByUserId()));
+    }
+
+    @GetMapping("/active-search")
+    public ResponseEntity<APIResponse<Void>> activeSearch(@RequestParam boolean check) {
+        recruitmentProfileService.activeSearch(check);
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
     @GetMapping
     public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getAll(SearchRecruitmentProfileRequest request) {
         return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.getAll(request)));
