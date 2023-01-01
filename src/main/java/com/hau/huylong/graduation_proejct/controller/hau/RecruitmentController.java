@@ -14,6 +14,7 @@ import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/recruitments")
@@ -57,5 +58,13 @@ public class RecruitmentController {
     @GetMapping
     public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getAll(SearchRecruitmentProfileRequest request) {
         return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.getAll(request)));
+    }
+
+    @PostMapping
+    public ResponseEntity<APIResponse<Void>> uploadProfile(@RequestParam("fileUpload") MultipartFile fileUpload,
+                                                          @RequestParam("filePath") String pathFile,
+                                                          @RequestParam("shared") String shared) {
+        recruitmentProfileService.uploadProfile(fileUpload, pathFile, Boolean.parseBoolean(shared));
+        return ResponseEntity.ok(APIResponse.success());
     }
 }
