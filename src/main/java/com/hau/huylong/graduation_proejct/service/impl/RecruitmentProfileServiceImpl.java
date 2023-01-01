@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.BeanUtil;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
+import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.RecruitmentProfileDTO;
@@ -18,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -31,7 +34,11 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
     @Override
     public RecruitmentProfileDTO save(RecruitmentProfileDTO recruitmentProfileDTO) throws JsonProcessingException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
         ObjectMapper mapper = new ObjectMapper();
+        recruitmentProfileDTO.setUserId(customUser.getId().longValue());
         RecruitmentProfile recruitmentProfile = recruitmentProfileMapper.from(recruitmentProfileDTO);
 
         if (recruitmentProfileDTO.getAcademyInfoDTO() != null) {
