@@ -126,6 +126,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     }
 
     private void setDTOProfile(ObjectMapper objectMapper, RecruitmentProfileDTO p) {
+        objectMapper.registerModule(new JavaTimeModule());
         try {
             AcademyInfoDTO academyInfoDTO = objectMapper
                     .readValue(p.getAcademyInfo(), AcademyInfoDTO.class);
