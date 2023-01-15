@@ -1,9 +1,5 @@
 package com.hau.huylong.graduation_proejct.model.request;
 
-import com.hau.huylong.graduation_proejct.model.dto.hau.AcademyInfoDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.ForeignLanguageDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.OfficeInfoDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.WorkExperienceDTO;
 import lombok.Data;
 
 @Data

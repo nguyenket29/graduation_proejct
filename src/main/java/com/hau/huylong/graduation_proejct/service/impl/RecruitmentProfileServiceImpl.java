@@ -9,14 +9,19 @@ import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
 import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.*;
 import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfileRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
+import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.RecruitmentProfileReps;
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.RecruitmentProfileService;
 import com.hau.huylong.graduation_proejct.service.mapper.RecruitmentProfileMapper;
+import com.hau.huylong.graduation_proejct.service.mapper.UserInfoMapper;
+import com.hau.huylong.graduation_proejct.service.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,8 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +43,9 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     private final RecruitmentProfileReps recruitmentProfileReps;
     private final GoogleDriverFile googleDriverFile;
     private final UserInfoReps userInfoReps;
+    private final UserInfoMapper userInfoMapper;
+    private final UserReps userReps;
+    private final UserMapper userMapper;
 
     @Override
     public RecruitmentProfileDTO save(RecruitmentProfileDTO recruitmentProfileDTO) {
@@ -113,9 +120,17 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
         }
 
+        return getRecruitmentProfileDTO(objectMapper, recruitmentProfileOptional);
+    }
+
+    private RecruitmentProfileDTO getRecruitmentProfileDTO(ObjectMapper objectMapper, Optional<RecruitmentProfile> recruitmentProfileOptional) {
         RecruitmentProfileDTO recruitmentProfileDTO = recruitmentProfileMapper.to(recruitmentProfileOptional.get());
 
         setDTOProfile(objectMapper, recruitmentProfileDTO);
+        Map<Integer, UserDTO> mapUser = getUser(Collections.singletonList(recruitmentProfileDTO.getUserId()));
+        if (!mapUser.isEmpty() && mapUser.containsKey(recruitmentProfileDTO.getUserId().intValue())) {
+            recruitmentProfileDTO.setUserDTO(mapUser.get(recruitmentProfileDTO.getUserId().intValue()));
+        }
 
         return recruitmentProfileDTO;
     }
@@ -127,7 +142,14 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
         Page<RecruitmentProfileDTO> page = recruitmentProfileReps.search(request, pageable).map(recruitmentProfileMapper::to);
 
         if (!page.isEmpty()) {
-            page.forEach(p -> setDTOProfile(objectMapper, p));
+            List<Long> userIds = page.map(RecruitmentProfileDTO::getUserId).toList();
+            Map<Integer, UserDTO> mapUser = getUser(userIds);
+            page.forEach(p -> {
+                setDTOProfile(objectMapper, p);
+                if (!mapUser.isEmpty() && mapUser.containsKey(p.getUserId().intValue())) {
+                    p.setUserDTO(mapUser.get(p.getUserId().intValue()));
+                }
+            });
         }
 
         return PageDataResponse.of(page);
@@ -167,11 +189,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
         }
 
-        RecruitmentProfileDTO recruitmentProfileDTO = recruitmentProfileMapper.to(recruitmentProfileOptional.get());
-
-        setDTOProfile(objectMapper, recruitmentProfileDTO);
-
-        return recruitmentProfileDTO;
+        return getRecruitmentProfileDTO(objectMapper, recruitmentProfileOptional);
     }
 
     @Override
@@ -249,7 +267,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không thể tìm thấy người dùng!");
         }
 
-        List<Long> profileIds;
+        List<Long> profileIds = new ArrayList<>();
         try {
             profileIds = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
         } catch (JsonProcessingException e) {
@@ -288,5 +306,34 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
         recruitmentProfileReps.save(recruitmentProfileOptional.get());
 
         return recruitmentProfileOptional.get().getView();
+    }
+
+    private Map<Integer, UserDTO> getUser(List<Long> userIds) {
+        Map<Integer, UserDTO> map = new HashMap<>();
+
+        if (userIds != null && !userIds.isEmpty()) {
+            List<Integer> userIdInts = new ArrayList<>();
+            userIds.forEach(u -> userIdInts.add(Integer.parseInt(String.valueOf(u))));
+            map = userReps.findByIds(userIdInts).stream().map(userMapper::to).collect(Collectors.toMap(UserDTO::getId, u -> u));
+            Map<Integer, UserInfoDTO> mapUserInfo = getUseInfo(userIdInts);
+            if (!map.isEmpty()) {
+                map.forEach((k, v) -> {
+                    if (!mapUserInfo.isEmpty() && mapUserInfo.containsKey(k)) {
+                        v.setUserInfoDTO(mapUserInfo.get(k));
+                    }
+                });
+            }
+        }
+
+        return map;
+    }
+
+    private Map<Integer, UserInfoDTO> getUseInfo(List<Integer> userIds) {
+        Map<Integer, UserInfoDTO> map = new HashMap<>();
+        if (userIds != null && !userIds.isEmpty()) {
+             map = userInfoReps.findByUserIdIn(userIds).stream().map(userInfoMapper::to)
+                     .collect(Collectors.toMap(UserInfoDTO::getUserId, ui -> ui));
+        }
+        return map;
     }
 }
