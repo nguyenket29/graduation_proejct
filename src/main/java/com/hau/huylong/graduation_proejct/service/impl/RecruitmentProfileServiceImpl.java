@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -269,7 +270,10 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
         List<Long> profileIds = new ArrayList<>();
         try {
-            profileIds = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
+            List<Integer> list = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
+            if (!CollectionUtils.isEmpty(list)) {
+                list.forEach(i -> profileIds.add(Long.parseLong(String.valueOf(i))));
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
