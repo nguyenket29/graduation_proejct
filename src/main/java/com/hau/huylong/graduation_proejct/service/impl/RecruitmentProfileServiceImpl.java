@@ -245,7 +245,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không thể tìm thấy người dùng!");
         }
 
-        if (ids != null && !ids.isEmpty()) {
+        if (ids != null) {
             try {
                 userOptional.get().setArrRecruitmentIds(objectMapper.writeValueAsString(ids));
             } catch (JsonProcessingException e) {

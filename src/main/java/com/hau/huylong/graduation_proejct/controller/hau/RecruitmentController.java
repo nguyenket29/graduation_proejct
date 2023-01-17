@@ -1,17 +1,13 @@
 package com.hau.huylong.graduation_proejct.controller.hau;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.hau.huylong.graduation_proejct.controller.APIController;
-import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.RecruitmentProfileDTO;
+import com.hau.huylong.graduation_proejct.model.request.ProfileRequest;
 import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfileRequest;
-import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.service.RecruitmentProfileService;
-import com.hau.huylong.graduation_proejct.service.UserService;
 import io.swagger.annotations.Api;
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,9 +48,9 @@ public class RecruitmentController {
         return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.findByUserId()));
     }
 
-    @GetMapping("/save-list")
-    public ResponseEntity<APIResponse<Void>> saveList(@RequestParam List<Long> ids) {
-        recruitmentProfileService.saveListProfile(ids);
+    @PostMapping("/save-list")
+    public ResponseEntity<APIResponse<Void>> saveList(@RequestBody ProfileRequest request) {
+        recruitmentProfileService.saveListProfile(request.getProfileIds());
         return ResponseEntity.ok(APIResponse.success());
     }
 
