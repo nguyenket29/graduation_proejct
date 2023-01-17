@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -251,6 +252,19 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        if (!CollectionUtils.isEmpty(ids)) {
+            List<RecruitmentProfile> recruitmentProfilesUpdate = new ArrayList<>();
+            List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(ids);
+            if (!CollectionUtils.isEmpty(recruitmentProfiles)) {
+                recruitmentProfiles.forEach(r -> {
+                    r.setTimeSubmit(Date.from(Instant.now()));
+                    recruitmentProfiles.add(r);
+                });
+            }
+
+            recruitmentProfileReps.saveAll(recruitmentProfilesUpdate);
         }
 
         userInfoReps.save(userOptional.get());

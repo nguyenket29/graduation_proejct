@@ -62,4 +62,6 @@ public class RecruitmentProfileDTO {
     private Integer view;
 
     private UserDTO userDTO;
+
+    private Date timeSubmit;
 }
