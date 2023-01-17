@@ -292,8 +292,8 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             recruitmentProfileDTOS.forEach(r -> {
                 setDTOProfile(objectMapper, r);
 
-                if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(r.getUserId())) {
-                    r.setUserDTO(mapUser.get(r.getUserId()));
+                if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(r.getUserId().intValue())) {
+                    r.setUserDTO(mapUser.get(r.getUserId().intValue()));
                 }
             });
         }
