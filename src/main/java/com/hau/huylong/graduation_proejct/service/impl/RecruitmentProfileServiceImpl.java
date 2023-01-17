@@ -259,7 +259,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(ids);
             if (!CollectionUtils.isEmpty(recruitmentProfiles)) {
                 recruitmentProfiles.forEach(r -> {
-                    r.setTimeSubmit(Date.from(Instant.now()));
+                    r.setTimeSubmit(new Date());
                     recruitmentProfiles.add(r);
                 });
             }
