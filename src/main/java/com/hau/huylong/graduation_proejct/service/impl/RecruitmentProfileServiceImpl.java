@@ -286,14 +286,16 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
         List<RecruitmentProfileDTO> recruitmentProfileDTOS = recruitmentProfiles.stream()
                 .map(recruitmentProfileMapper::to).collect(Collectors.toList());
-        Map<Integer, UserDTO> mapUser = getUser(Collections.singletonList(customUser.getId().longValue()));
 
         if (!recruitmentProfileDTOS.isEmpty()) {
+            List<Long> userIds = recruitmentProfileDTOS.stream().map(RecruitmentProfileDTO::getUserId).collect(Collectors.toList());
+            Map<Integer, UserDTO> mapUser = getUser(userIds);
+
             recruitmentProfileDTOS.forEach(r -> {
                 setDTOProfile(objectMapper, r);
 
-                if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(customUser.getId())) {
-                    r.setUserDTO(mapUser.get(customUser.getId()));
+                if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(r.getUserId().intValue())) {
+                    r.setUserDTO(mapUser.get(r.getUserId().intValue()));
                 }
             });
         }
