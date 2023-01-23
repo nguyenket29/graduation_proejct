@@ -15,10 +15,20 @@ public interface PostReps extends JpaRepository<Post, Long> {
     @Query("select i from Post i " +
             " WHERE (:#{#request.industryId} IS NULL OR i.industryId = :#{#request.industryId}) " +
             " AND (:#{#request.salaryMax} IS NULL OR i.salaryMax = :#{#request.salaryMax}) " +
+            " AND (:#{#request.companyId} IS NULL OR i.companyId = :#{#request.companyId}) " +
+            " AND (:#{#request.jobApplicationDeadline} IS NULL OR i.jobApplicationDeadline = :#{#request.jobApplicationDeadline}) " +
+            " AND (:#{#request.dateSubmit} IS NULL OR i.dateSubmit = :#{#request.dateSubmit}) " +
+            " AND (:#{#request.title} IS NULL OR i.title LIKE %:#{#request.title}%) " +
+            " AND (:#{#request.probationaryPeriod} IS NULL OR i.probationaryPeriod LIKE %:#{#request.probationaryPeriod}%) " +
+            " AND (:#{#request.workplace} IS NULL OR i.workplace LIKE %:#{#request.workplace}%) " +
+            " AND (:#{#request.necessarySkills} IS NULL OR i.necessarySkills LIKE %:#{#request.necessarySkills}%) " +
+            " AND (:#{#request.level} IS NULL OR i.level LIKE %:#{#request.level}%) " +
             " AND (:#{#request.salaryMin} IS NULL OR i.salaryMin = :#{#request.salaryMin}) " +
+            " AND (:#{#request.numberOfRecruits} IS NULL OR i.numberOfRecruits = :#{#request.numberOfRecruits}) " +
             " AND (:#{#request.recruitmentArea} IS NULL OR i.recruitmentArea LIKE %:#{#request.recruitmentArea}%) " +
+            " AND (:#{#request.recruitmentGender} IS NULL OR i.recruitmentGender LIKE %:#{#request.recruitmentGender}%) " +
             " AND (:#{#request.recruitmentDegree} IS NULL OR i.recruitmentDegree LIKE %:#{#request.recruitmentDegree}%) " +
-            " AND (:#{#request.recruitmentExperience} IS NULL OR i.recruitmentExperience LIKE %:#{#request.recruitmentExperience}%) " +
+            " AND (:#{#request.recruitmentExperience} IS NULL OR i.recruitmentExperience = :#{#request.recruitmentExperience}) " +
             " AND (:#{#request.workingForm} IS NULL OR i.workingForm LIKE %:#{#request.workingForm}%) " +
             " AND (:#{#request.jobDescription} IS NULL OR i.jobDescription LIKE %:#{#request.jobDescription}%) " +
             " AND (:#{#request.jobRequirements} IS NULL OR i.jobRequirements LIKE %:#{#request.jobRequirements}%) " +
