@@ -65,6 +65,7 @@ public class PostServiceImpl implements PostService {
         }
 
         postDTO.setStatus(WAITING_APPROVE.name());
+        postDTO.setIsOutstanding(false);
 
         return postMapper.to(postReps.save(postMapper.from(postDTO)));
     }

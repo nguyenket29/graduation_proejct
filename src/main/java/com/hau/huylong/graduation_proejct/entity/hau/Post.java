@@ -85,5 +85,5 @@ public class Post extends BaseEntity {
     private String status;
 
     @Column(name = "is_outstanding")
-    private boolean isOutstanding = false;
+    private Boolean isOutstanding;
 }

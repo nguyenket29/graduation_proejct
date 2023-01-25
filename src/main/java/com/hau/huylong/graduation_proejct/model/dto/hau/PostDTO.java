@@ -34,7 +34,7 @@ public class PostDTO {
     private String jobRequirements;
     private String benefits;
     private String status;
-    private boolean isOutstanding;
+    private Boolean isOutstanding;
     private Long companyId;
     private CompanyDTO companyDTO;
     private IndustryDTO industryDTO;
