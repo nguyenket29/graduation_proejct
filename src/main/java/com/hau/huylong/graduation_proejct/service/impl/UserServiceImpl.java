@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
+import com.hau.huylong.graduation_proejct.common.util.StringUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.Role;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
@@ -115,7 +116,7 @@ public class UserServiceImpl implements UserService {
              mapUserInfo = userInfoReps.findByUserIdIn(userIds)
                 .stream().map(u -> {
                     UserInfoDTO userInfoDTO = userInfoMapper.to(u);
-                    if (userInfoDTO.getArrRecruitmentIds() != null) {
+                    if (!StringUtils.isNullOrEmpty(userInfoDTO.getArrRecruitmentIds())) {
                         try {
                             List<Integer> list = objectMapper.readValue(userInfoDTO.getArrRecruitmentIds(), List.class);
                             if (!CollectionUtils.isEmpty(list)) {

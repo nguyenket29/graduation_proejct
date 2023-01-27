@@ -14,8 +14,8 @@ import java.util.List;
 public interface PostReps extends JpaRepository<Post, Long> {
     @Query("select i from Post i " +
             " WHERE (:#{#request.industryId} IS NULL OR i.industryId = :#{#request.industryId}) " +
-            " AND (:#{#request.salaryMax} IS NULL OR i.salaryMax >= :#{#request.salaryMax}) " +
-            " AND (:#{#request.salaryMin} IS NULL OR i.salaryMin <= :#{#request.salaryMin}) " +
+            " AND (:#{#request.salaryMax} IS NULL OR i.salaryMax <= :#{#request.salaryMax}) " +
+            " AND (:#{#request.salaryMin} IS NULL OR i.salaryMin >= :#{#request.salaryMin}) " +
             " AND (:#{#request.companyId} IS NULL OR i.companyId = :#{#request.companyId}) " +
             " AND (:#{#request.jobApplicationDeadline} IS NULL OR i.jobApplicationDeadline = :#{#request.jobApplicationDeadline}) " +
             " AND (:#{#request.dateSubmit} IS NULL OR i.dateSubmit = :#{#request.dateSubmit}) " +
