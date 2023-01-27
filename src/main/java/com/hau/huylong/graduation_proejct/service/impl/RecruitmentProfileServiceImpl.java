@@ -188,11 +188,11 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
         Optional<RecruitmentProfile> recruitmentProfileOptional = recruitmentProfileReps
                 .findByUserId(customUser.getId().longValue());
 
-        if (recruitmentProfileOptional.isEmpty()) {
-            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        if (recruitmentProfileOptional.isPresent()) {
+            return getRecruitmentProfileDTO(objectMapper, recruitmentProfileOptional);
         }
 
-        return getRecruitmentProfileDTO(objectMapper, recruitmentProfileOptional);
+        return new RecruitmentProfileDTO();
     }
 
     @Override
