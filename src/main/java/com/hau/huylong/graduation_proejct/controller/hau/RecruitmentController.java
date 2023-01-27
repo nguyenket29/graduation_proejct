@@ -76,10 +76,10 @@ public class RecruitmentController {
     }
 
     @PostMapping("/upload-profile")
-    public ResponseEntity<APIResponse<Void>> uploadProfile(@RequestParam("fileUpload") MultipartFile fileUpload,
+    public ResponseEntity<APIResponse<String>> uploadProfile(@RequestParam("fileUpload") MultipartFile fileUpload,
                                                           @RequestParam("filePath") String pathFile,
                                                           @RequestParam("shared") String shared) {
-        recruitmentProfileService.uploadProfile(fileUpload, pathFile, Boolean.parseBoolean(shared));
-        return ResponseEntity.ok(APIResponse.success());
+        return ResponseEntity.ok(APIResponse
+                .success(recruitmentProfileService.uploadProfile(fileUpload, pathFile, Boolean.parseBoolean(shared))));
     }
 }

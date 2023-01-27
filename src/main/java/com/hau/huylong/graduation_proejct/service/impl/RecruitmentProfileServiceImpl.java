@@ -215,7 +215,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     }
 
     @Override
-    public void uploadProfile(MultipartFile file, String filePath, boolean isPublic) {
+    public String uploadProfile(MultipartFile file, String filePath, boolean isPublic) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
 
@@ -232,6 +232,8 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
             recruitmentProfileReps.save(recruitmentProfile);
         }
+
+        return fileId;
     }
 
     @Override
