@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.BeanUtil;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
+import com.hau.huylong.graduation_proejct.common.util.StringUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
 import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
@@ -286,9 +287,11 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
         List<Long> profileIds = new ArrayList<>();
         try {
-            List<Integer> list = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
-            if (!CollectionUtils.isEmpty(list)) {
-                list.forEach(i -> profileIds.add(Long.parseLong(String.valueOf(i))));
+            if (!StringUtils.isNullOrEmpty(userOptional.get().getArrRecruitmentIds())) {
+                List<Integer> list = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
+                if (!CollectionUtils.isEmpty(list)) {
+                    list.forEach(i -> profileIds.add(Long.parseLong(String.valueOf(i))));
+                }
             }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
