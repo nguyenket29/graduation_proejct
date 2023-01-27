@@ -192,7 +192,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             return getRecruitmentProfileDTO(objectMapper, recruitmentProfileOptional);
         }
 
-        return new RecruitmentProfileDTO();
+        return null;
     }
 
     @Override
