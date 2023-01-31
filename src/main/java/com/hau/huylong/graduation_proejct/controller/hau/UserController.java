@@ -6,6 +6,7 @@ import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,11 +48,20 @@ public class UserController  {
         return ResponseEntity.ok(APIResponse.success());
     }
 
-    @PostMapping
+    @PostMapping("/avatar")
     public ResponseEntity<APIResponse<Void>> uploadAvatar(@RequestParam("fileUpload") MultipartFile fileUpload,
                                                           @RequestParam("filePath") String pathFile,
                                                           @RequestParam("shared") String shared) {
         userService.uploadAvatar(fileUpload, pathFile, Boolean.parseBoolean(shared));
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
+    @ApiOperation(value = "API upload hồ sơ công ty")
+    @PostMapping("/company-profile")
+    public ResponseEntity<APIResponse<Void>> uploadProfileCompany(@RequestParam("fileUpload") MultipartFile fileUpload,
+                                                          @RequestParam("filePath") String pathFile,
+                                                          @RequestParam("shared") String shared) {
+        userService.uploadCompanyProfile(fileUpload, pathFile, Boolean.parseBoolean(shared));
         return ResponseEntity.ok(APIResponse.success());
     }
 }

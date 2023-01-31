@@ -187,6 +187,8 @@ public class UserServiceImpl implements UserService {
                 company.setFieldOfActivity(userRequest.getCompanyRequest().getFieldOfActivity());
                 company.setLocation(userRequest.getCompanyRequest().getLocation());
                 company.setEmailCompany(userRequest.getCompanyRequest().getEmailCompany());
+                company.setBusinessIntroduction(userRequest.getCompanyRequest().getBusinessIntroduction());
+                company.setBusinessLicense(userRequest.getCompanyRequest().getBusinessLicense());
                 user.setType(TypeUser.EMPLOYER);
 
                 userInfoDTO = userInfoMapper.to(userInfoReps.save(userContactInfo));
@@ -302,7 +304,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userReps.findById(userId);
 
         if (userOptional.isEmpty()) {
-            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không thể tìm thấy người dùng với id  " + userOptional);
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy người dùng với id  " + userOptional);
         }
 
         if (check) {
@@ -312,5 +314,20 @@ public class UserServiceImpl implements UserService {
         }
 
         userReps.save(userOptional.get());
+    }
+
+    @Override
+    public void uploadCompanyProfile(MultipartFile file, String filePath, boolean isPublic) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        Optional<Company> companyOptional = companyReps.findByUserId(user.getId());
+        if (companyOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy công ty");
+        }
+
+        String fileId = googleDriverFile.uploadFile(file, filePath, isPublic);
+        companyOptional.get().setFileId(fileId);
+        companyReps.save(companyOptional.get());
     }
 }

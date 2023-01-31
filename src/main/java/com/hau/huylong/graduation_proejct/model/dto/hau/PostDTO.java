@@ -38,4 +38,5 @@ public class PostDTO {
     private Long companyId;
     private CompanyDTO companyDTO;
     private IndustryDTO industryDTO;
+    private boolean userCurrentSaved;
 }

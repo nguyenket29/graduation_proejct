@@ -8,6 +8,7 @@ import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
 import com.hau.huylong.graduation_proejct.entity.hau.Company;
 import com.hau.huylong.graduation_proejct.entity.hau.Post;
+import com.hau.huylong.graduation_proejct.entity.hau.UserPost;
 import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
@@ -17,6 +18,7 @@ import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
 import com.hau.huylong.graduation_proejct.repository.hau.IndustryReps;
 import com.hau.huylong.graduation_proejct.repository.hau.PostReps;
+import com.hau.huylong.graduation_proejct.repository.hau.UserPostReps;
 import com.hau.huylong.graduation_proejct.service.PostService;
 import com.hau.huylong.graduation_proejct.service.mapper.CompanyMapper;
 import com.hau.huylong.graduation_proejct.service.mapper.IndustryMapper;
@@ -29,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,6 +49,7 @@ public class PostServiceImpl implements PostService {
     private final CompanyMapper companyMapper;
     private final IndustryReps industryReps;
     private final IndustryMapper industryMapper;
+    private final UserPostReps userPostReps;
 
     @Override
     public PostDTO save(PostDTO postDTO) {
@@ -143,6 +147,7 @@ public class PostServiceImpl implements PostService {
             List<Long> industryIds = page.stream().map(PostDTO::getIndustryId).collect(Collectors.toList());
             Map<Long, CompanyDTO> companyDTOMap = setCompanyDTO(companyIds);
             Map<Long, IndustryDTO> industryDTOMap = setIndustryDTO(industryIds);
+            Map<Long, Boolean> mapTopicStatusSave = mapTopicStatusSave();
 
             page.forEach(p -> {
                 if (companyDTOMap.containsKey(p.getCompanyId())) {
@@ -151,6 +156,10 @@ public class PostServiceImpl implements PostService {
 
                 if (industryDTOMap.containsKey(p.getIndustryId())) {
                     p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
+                }
+
+                if (!CollectionUtils.isEmpty(mapTopicStatusSave) && mapTopicStatusSave.containsKey(p.getId())) {
+                    p.setUserCurrentSaved(mapTopicStatusSave.get(p.getId()));
                 }
             });
         }
@@ -174,5 +183,73 @@ public class PostServiceImpl implements PostService {
             companyDTOMap = industryDTOS.stream().collect(Collectors.toMap(IndustryDTO::getId, c -> c));
         }
         return companyDTOMap;
+    }
+
+    @Override
+    public void currentUserSavePost(Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        Optional<Post> postOptional = postReps.findById(postId);
+        if (postOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy bài viết");
+        }
+
+        UserPost userPost = new UserPost();
+        userPost.setPostId(postOptional.get().getId());
+        userPost.setUserId(user.getId());
+        userPostReps.save(userPost);
+    }
+
+    private Map<Long, Boolean> mapTopicStatusSave() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        List<UserPost> userPosts = userPostReps.findByUserId(user.getId());
+
+        Map<Long, Boolean> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            userPosts.forEach(u -> {
+                if (Objects.equals(u.getUserId(), user.getId())) {
+                    map.put(u.getPostId(), true);
+                }
+            });
+        }
+
+        return map;
+    }
+
+    @Override
+    public PageDataResponse<PostDTO> getAllPostCurrentUserSave(SearchPostRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        List<UserPost> userPosts = userPostReps.findByUserId(user.getId());
+        List<Long> postIds = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            postIds = userPosts.stream().map(UserPost::getPostId).distinct().collect(Collectors.toList());
+        }
+
+        Pageable pageable = PageableUtils.of(request.getPage(), request.getSize());
+        Page<PostDTO> page = userPostReps.search(request, postIds, pageable).map(postMapper::to);
+
+        if (!page.isEmpty()) {
+            List<Long> companyIds = page.stream().map(PostDTO::getCompanyId).collect(Collectors.toList());
+            List<Long> industryIds = page.stream().map(PostDTO::getIndustryId).collect(Collectors.toList());
+            Map<Long, CompanyDTO> companyDTOMap = setCompanyDTO(companyIds);
+            Map<Long, IndustryDTO> industryDTOMap = setIndustryDTO(industryIds);
+
+            page.forEach(p -> {
+                if (companyDTOMap.containsKey(p.getCompanyId())) {
+                    p.setCompanyDTO(companyDTOMap.get(p.getCompanyId()));
+                }
+
+                if (industryDTOMap.containsKey(p.getIndustryId())) {
+                    p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
+                }
+            });
+        }
+
+        return PageDataResponse.of(page);
     }
 }
