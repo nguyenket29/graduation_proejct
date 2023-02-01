@@ -48,8 +48,9 @@ public class PostController {
 
     @GetMapping("/user-current-save")
     @ApiOperation(value = "Người dùng hiện tại lưu bài viết")
-    public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> userCurrentSavePost(SearchPostRequest request) {
-        return ResponseEntity.ok(APIResponse.success(postService.getAll(request)));
+    public ResponseEntity<APIResponse<Void>> userCurrentSavePost(@RequestParam Long postId) {
+        postService.currentUserSavePost(postId);
+        return ResponseEntity.ok(APIResponse.success());
     }
 
     @GetMapping("/get-list-user-save")
