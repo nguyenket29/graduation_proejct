@@ -58,10 +58,9 @@ public class UserController  {
 
     @ApiOperation(value = "API upload hồ sơ công ty")
     @PostMapping("/company-profile")
-    public ResponseEntity<APIResponse<Void>> uploadProfileCompany(@RequestParam("fileUpload") MultipartFile fileUpload,
+    public ResponseEntity<APIResponse<String>> uploadProfileCompany(@RequestParam("fileUpload") MultipartFile fileUpload,
                                                           @RequestParam("filePath") String pathFile,
                                                           @RequestParam("shared") String shared) {
-        userService.uploadCompanyProfile(fileUpload, pathFile, Boolean.parseBoolean(shared));
-        return ResponseEntity.ok(APIResponse.success());
+        return ResponseEntity.ok(APIResponse.success(userService.uploadCompanyProfile(fileUpload, pathFile, Boolean.parseBoolean(shared))));
     }
 }

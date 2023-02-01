@@ -317,7 +317,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void uploadCompanyProfile(MultipartFile file, String filePath, boolean isPublic) {
+    public String uploadCompanyProfile(MultipartFile file, String filePath, boolean isPublic) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser user = (CustomUser) authentication.getPrincipal();
 
@@ -329,5 +329,6 @@ public class UserServiceImpl implements UserService {
         String fileId = googleDriverFile.uploadFile(file, filePath, isPublic);
         companyOptional.get().setFileId(fileId);
         companyReps.save(companyOptional.get());
+        return fileId;
     }
 }
