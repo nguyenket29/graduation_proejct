@@ -53,6 +53,13 @@ public class PostController {
         return ResponseEntity.ok(APIResponse.success());
     }
 
+    @GetMapping("/remove-post-saved")
+    @ApiOperation(value = "Xóa bài viết người dùng hiện tại đa lưu")
+    public ResponseEntity<APIResponse<Void>> userCurrentRemovePost(@RequestParam Long postId) {
+        postService.removePostByCurrentUserSave(postId);
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
     @GetMapping("/get-list-user-save")
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã lưu")
     public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfUserCurrent(SearchPostRequest request) {

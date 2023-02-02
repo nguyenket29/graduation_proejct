@@ -14,6 +14,7 @@ import java.util.List;
 @Repository
 public interface UserPostReps extends JpaRepository<UserPost, Long> {
     List<UserPost> findByUserId(Integer userId);
+    List<UserPost> findByPostIdAndUserId(Long postId, Integer userId);
 
     @Query("select i from Post i " +
             " WHERE (:#{#request.industryId} IS NULL OR i.industryId = :#{#request.industryId}) " +

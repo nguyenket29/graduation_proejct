@@ -23,6 +23,7 @@ public interface UserService {
     void inActive(Integer userId, boolean check);
     String uploadCompanyProfile(MultipartFile file, String filePath, boolean isPublic);
     void userSubmitPostRecruitment(Long postId);
+    void removePostByCurrentUserSubmit(Long postId);
     PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request);
     List<IndustryDTO> getListIndustryHot();
 }

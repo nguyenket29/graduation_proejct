@@ -358,6 +358,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void removePostByCurrentUserSubmit(Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+        List<UserRecruitmentPost> userPosts = userRecruitmentPostReps.findByUserIdAndPostId(user.getId(), postId);
+
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            userRecruitmentPostReps.deleteAll(userPosts);
+        }
+    }
+
+    @Override
     public PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser user = (CustomUser) authentication.getPrincipal();

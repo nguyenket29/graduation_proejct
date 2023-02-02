@@ -6,5 +6,6 @@ import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 
 public interface PostService extends GenericService<PostDTO, SearchPostRequest> {
     void currentUserSavePost(Long postId);
+    void removePostByCurrentUserSave(Long postId);
     PageDataResponse<PostDTO> getAllPostCurrentUserSave(SearchPostRequest request);
 }

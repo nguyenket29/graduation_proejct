@@ -73,6 +73,13 @@ public class UserController  {
         return ResponseEntity.ok(APIResponse.success());
     }
 
+    @GetMapping("/remove-submit-topic")
+    @ApiOperation(value = "Xóa tin mà người dùng hiện tại ứng tuyển")
+    public ResponseEntity<APIResponse<Void>> userCurrentRemovePost(@RequestParam Long postId) {
+        userService.userSubmitPostRecruitment(postId);
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
     @GetMapping("/get-list-topic-submit")
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển")
     public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfUserCurrent(SearchPostRequest request) {

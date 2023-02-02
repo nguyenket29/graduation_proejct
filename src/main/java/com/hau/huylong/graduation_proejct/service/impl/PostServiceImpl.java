@@ -201,6 +201,17 @@ public class PostServiceImpl implements PostService {
         userPostReps.save(userPost);
     }
 
+    @Override
+    public void removePostByCurrentUserSave(Long postId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+        List<UserPost> userPosts = userPostReps.findByPostIdAndUserId(postId, user.getId());
+
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            userPostReps.deleteAll(userPosts);
+        }
+    }
+
     private Map<Long, Boolean> mapTopicStatusSave() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser user = (CustomUser) authentication.getPrincipal();
