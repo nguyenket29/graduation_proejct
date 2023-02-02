@@ -2,7 +2,6 @@ package com.hau.huylong.graduation_proejct.model.dto.hau;
 
 import lombok.Data;
 
-import javax.persistence.Column;
 import java.time.Instant;
 import java.util.Date;
 
@@ -39,4 +38,5 @@ public class PostDTO {
     private CompanyDTO companyDTO;
     private IndustryDTO industryDTO;
     private boolean userCurrentSaved;
+    private Integer view;
 }

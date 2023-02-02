@@ -86,4 +86,7 @@ public class Post extends BaseEntity {
 
     @Column(name = "is_outstanding")
     private Boolean isOutstanding;
+
+    @Column(name = "view")
+    private Integer view;
 }

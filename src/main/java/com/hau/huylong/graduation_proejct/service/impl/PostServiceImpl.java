@@ -8,6 +8,7 @@ import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
 import com.hau.huylong.graduation_proejct.entity.hau.Company;
 import com.hau.huylong.graduation_proejct.entity.hau.Post;
+import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
 import com.hau.huylong.graduation_proejct.entity.hau.UserPost;
 import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
@@ -228,6 +229,24 @@ public class PostServiceImpl implements PostService {
         }
 
         return map;
+    }
+
+    @Override
+    public Integer viewProfile(Long postId) {
+        Optional<Post> postOptional = postReps.findById(postId);
+
+        if (postOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        }
+
+        if (postOptional.get().getView() == null) {
+            postOptional.get().setView(0);
+        }
+
+        postOptional.get().setView(postOptional.get().getView() + 1);
+        postReps.save(postOptional.get());
+
+        return postOptional.get().getView();
     }
 
     @Override

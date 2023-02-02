@@ -60,6 +60,11 @@ public class PostController {
         return ResponseEntity.ok(APIResponse.success());
     }
 
+    @GetMapping("/get-view")
+    public ResponseEntity<APIResponse<Integer>> getView(@RequestParam Long id) {
+        return ResponseEntity.ok(APIResponse.success(postService.viewProfile(id)));
+    }
+
     @GetMapping("/get-list-user-save")
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã lưu")
     public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfUserCurrent(SearchPostRequest request) {
