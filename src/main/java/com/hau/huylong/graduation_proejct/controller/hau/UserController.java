@@ -1,6 +1,8 @@
 package com.hau.huylong.graduation_proejct.controller.hau;
 
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
+import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
@@ -62,5 +64,18 @@ public class UserController  {
                                                           @RequestParam("filePath") String pathFile,
                                                           @RequestParam("shared") String shared) {
         return ResponseEntity.ok(APIResponse.success(userService.uploadCompanyProfile(fileUpload, pathFile, Boolean.parseBoolean(shared))));
+    }
+
+    @GetMapping("/user-submit-topic")
+    @ApiOperation(value = "Người dùng hiện tại ứng tuyển")
+    public ResponseEntity<APIResponse<Void>> userCurrentSavePost(@RequestParam Long postId) {
+        userService.userSubmitPostRecruitment(postId);
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
+    @GetMapping("/get-list-topic-submit")
+    @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển")
+    public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfUserCurrent(SearchPostRequest request) {
+        return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitment(request)));
     }
 }

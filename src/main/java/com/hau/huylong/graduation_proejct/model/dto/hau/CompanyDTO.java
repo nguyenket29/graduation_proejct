@@ -23,4 +23,6 @@ public class CompanyDTO {
     private String fileId;
     private String businessLicense;
     private String businessIntroduction;
+
+    private Integer numberStudentSubmit;
 }

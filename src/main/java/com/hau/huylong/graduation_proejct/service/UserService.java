@@ -2,6 +2,9 @@ package com.hau.huylong.graduation_proejct.service;
 
 import com.hau.huylong.graduation_proejct.entity.auth.User;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
+import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,4 +22,7 @@ public interface UserService {
     void uploadAvatar(MultipartFile file, String filePath, boolean isPublic);
     void inActive(Integer userId, boolean check);
     String uploadCompanyProfile(MultipartFile file, String filePath, boolean isPublic);
+    void userSubmitPostRecruitment(Long postId);
+    PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request);
+    List<IndustryDTO> getListIndustryHot();
 }
