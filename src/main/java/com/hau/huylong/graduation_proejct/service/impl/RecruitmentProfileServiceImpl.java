@@ -297,11 +297,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
         }
 
         if (!CollectionUtils.isEmpty(profileIds)) {
-            profileIds.forEach(i -> {
-                if (Objects.equals(i, profileId)) {
-                    profileIds.remove(i);
-                }
-            });
+            profileIds.remove(profileId);
 
             try {
                 String profileIdString = objectMapper.writeValueAsString(profileIds);
