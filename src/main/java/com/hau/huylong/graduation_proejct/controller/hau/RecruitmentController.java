@@ -49,8 +49,14 @@ public class RecruitmentController {
     }
 
     @PostMapping("/save-list")
-    public ResponseEntity<APIResponse<Void>> saveList(@RequestBody ProfileRequest request) {
+    public ResponseEntity<APIResponse<Void>> saveListProfileId(@RequestBody ProfileRequest request) {
         recruitmentProfileService.saveListProfile(request.getProfileIds());
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
+    @GetMapping("/remove-profile")
+    public ResponseEntity<APIResponse<Void>> removeProfileId(@RequestParam Long profileId) {
+        recruitmentProfileService.removeProfileRecruitment(profileId);
         return ResponseEntity.ok(APIResponse.success());
     }
 

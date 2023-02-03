@@ -11,6 +11,7 @@ public interface RecruitmentProfileService extends GenericService<RecruitmentPro
     void activeSearch(boolean check);
     String uploadProfile(MultipartFile file, String filePath, boolean isPublic);
     void saveListProfile(List<Long> ids);
+    void removeProfileRecruitment(Long profileId);
     List<RecruitmentProfileDTO> getByListProfileId();
     Integer viewProfile(Long profileId);
 }

@@ -273,6 +273,45 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
         userInfoReps.save(userOptional.get());
     }
 
+    public void removeProfileRecruitment(Long profileId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+        Optional<UserInfo> userOptional = userInfoReps.findByUserId(customUser.getId());
+
+        if (userOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không thể tìm thấy người dùng!");
+        }
+
+        List<Long> profileIds = new ArrayList<>();
+        if (!StringUtils.isNullOrEmpty(userOptional.get().getArrRecruitmentIds())) {
+            try {
+                List<Integer> profileRecruitmentIds = objectMapper.readValue(userOptional.get().getArrRecruitmentIds(), List.class);
+                if (!CollectionUtils.isEmpty(profileRecruitmentIds)) {
+                    profileRecruitmentIds.forEach(i -> profileIds.add(Long.parseLong(String.valueOf(i))));
+                }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(profileIds)) {
+            profileIds.forEach(i -> {
+                if (Objects.equals(i, profileId)) {
+                    profileIds.remove(i);
+                }
+            });
+        }
+
+        try {
+            String profileIdString = objectMapper.writeValueAsString(profileIds);
+            userOptional.get().setArrRecruitmentIds(profileIdString);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public List<RecruitmentProfileDTO> getByListProfileId() {
         ObjectMapper objectMapper = new ObjectMapper();
