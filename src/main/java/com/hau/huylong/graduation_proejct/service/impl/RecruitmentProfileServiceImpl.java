@@ -312,6 +312,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
     @Override
     public List<RecruitmentProfileDTO> getByListProfileId() {
+        List<RecruitmentProfileDTO> recruitmentProfileDTOS = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
@@ -342,7 +343,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
                 throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
             }
 
-            List<RecruitmentProfileDTO> recruitmentProfileDTOS = recruitmentProfiles.stream()
+            recruitmentProfileDTOS = recruitmentProfiles.stream()
                     .map(recruitmentProfileMapper::to).collect(Collectors.toList());
 
             if (!recruitmentProfileDTOS.isEmpty()) {
@@ -357,11 +358,9 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
                     }
                 });
             }
-
-            return recruitmentProfileDTOS;
         }
 
-        return new ArrayList<>();
+        return recruitmentProfileDTOS;
     }
 
     @Override
