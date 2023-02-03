@@ -10,20 +10,21 @@ import com.hau.huylong.graduation_proejct.entity.hau.Company;
 import com.hau.huylong.graduation_proejct.entity.hau.Post;
 import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
 import com.hau.huylong.graduation_proejct.entity.hau.UserPost;
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
 import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
+import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
 import com.hau.huylong.graduation_proejct.repository.hau.IndustryReps;
 import com.hau.huylong.graduation_proejct.repository.hau.PostReps;
 import com.hau.huylong.graduation_proejct.repository.hau.UserPostReps;
 import com.hau.huylong.graduation_proejct.service.PostService;
-import com.hau.huylong.graduation_proejct.service.mapper.CompanyMapper;
-import com.hau.huylong.graduation_proejct.service.mapper.IndustryMapper;
-import com.hau.huylong.graduation_proejct.service.mapper.PostMapper;
+import com.hau.huylong.graduation_proejct.service.mapper.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,6 +52,9 @@ public class PostServiceImpl implements PostService {
     private final IndustryReps industryReps;
     private final IndustryMapper industryMapper;
     private final UserPostReps userPostReps;
+    private final UserInfoReps userInfoReps;
+    private final UserInfoMapper userInfoMapper;
+    private final UserMapper userMapper;
 
     @Override
     public PostDTO save(PostDTO postDTO) {
@@ -172,6 +176,24 @@ public class PostServiceImpl implements PostService {
         Map<Long, CompanyDTO> companyDTOMap = new HashMap<>();
         if (companyIds != null && !companyIds.isEmpty()) {
             List<CompanyDTO> companyDTOS = companyReps.findByIdIn(companyIds).stream().map(companyMapper::to).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(companyDTOS)) {
+                List<Integer> userIds = companyDTOS.stream().map(CompanyDTO::getUserId).collect(Collectors.toList());
+                Map<Integer, UserDTO> mapUserDTO = userReps.findByIds(userIds)
+                        .stream().map(userMapper::to).collect(Collectors.toMap(UserDTO::getId, u -> u));
+                Map<Integer, UserInfoDTO> mapUseInfoDTO = userInfoReps.findByUserIdIn(userIds)
+                        .stream().map(userInfoMapper::to).collect(Collectors.toMap(UserInfoDTO::getUserId, u -> u));
+
+                companyDTOS.forEach(c -> {
+                    if (!CollectionUtils.isEmpty(mapUserDTO) && mapUserDTO.containsKey(c.getUserId())) {
+                        c.setUserDTO(mapUserDTO.get(c.getUserId()));
+                    }
+
+                    if (!CollectionUtils.isEmpty(mapUseInfoDTO) && mapUseInfoDTO.containsKey(c.getUserId())) {
+                        c.setUserInfoDTO(mapUseInfoDTO.get(c.getUserId()));
+                    }
+                });
+            }
+
             companyDTOMap = companyDTOS.stream().collect(Collectors.toMap(CompanyDTO::getId, c -> c));
         }
         return companyDTOMap;

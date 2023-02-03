@@ -1,5 +1,7 @@
 package com.hau.huylong.graduation_proejct.model.dto.hau;
 
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import lombok.Data;
 
 import javax.persistence.Column;
@@ -25,4 +27,6 @@ public class CompanyDTO {
     private String businessIntroduction;
 
     private Integer numberStudentSubmit;
+    private UserInfoDTO userInfoDTO;
+    private UserDTO userDTO;
 }
