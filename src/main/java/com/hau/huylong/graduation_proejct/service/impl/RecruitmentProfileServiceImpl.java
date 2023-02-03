@@ -302,13 +302,15 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
                     profileIds.remove(i);
                 }
             });
-        }
 
-        try {
-            String profileIdString = objectMapper.writeValueAsString(profileIds);
-            userOptional.get().setArrRecruitmentIds(profileIdString);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            try {
+                String profileIdString = objectMapper.writeValueAsString(profileIds);
+                userOptional.get().setArrRecruitmentIds(profileIdString);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            userInfoReps.save(userOptional.get());
         }
     }
 
