@@ -334,29 +334,34 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             throw new RuntimeException(e);
         }
 
-        List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(profileIds);
 
-        if (recruitmentProfiles.isEmpty()) {
-            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        if (!CollectionUtils.isEmpty(profileIds)) {
+            List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(profileIds);
+
+            if (recruitmentProfiles.isEmpty()) {
+                throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+            }
+
+            List<RecruitmentProfileDTO> recruitmentProfileDTOS = recruitmentProfiles.stream()
+                    .map(recruitmentProfileMapper::to).collect(Collectors.toList());
+
+            if (!recruitmentProfileDTOS.isEmpty()) {
+                List<Long> userIds = recruitmentProfileDTOS.stream().map(RecruitmentProfileDTO::getUserId).collect(Collectors.toList());
+                Map<Integer, UserDTO> mapUser = getUser(userIds);
+
+                recruitmentProfileDTOS.forEach(r -> {
+                    setDTOProfile(objectMapper, r);
+
+                    if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(r.getUserId().intValue())) {
+                        r.setUserDTO(mapUser.get(r.getUserId().intValue()));
+                    }
+                });
+            }
+
+            return recruitmentProfileDTOS;
         }
 
-        List<RecruitmentProfileDTO> recruitmentProfileDTOS = recruitmentProfiles.stream()
-                .map(recruitmentProfileMapper::to).collect(Collectors.toList());
-
-        if (!recruitmentProfileDTOS.isEmpty()) {
-            List<Long> userIds = recruitmentProfileDTOS.stream().map(RecruitmentProfileDTO::getUserId).collect(Collectors.toList());
-            Map<Integer, UserDTO> mapUser = getUser(userIds);
-
-            recruitmentProfileDTOS.forEach(r -> {
-                setDTOProfile(objectMapper, r);
-
-                if (!CollectionUtils.isEmpty(mapUser) && mapUser.containsKey(r.getUserId().intValue())) {
-                    r.setUserDTO(mapUser.get(r.getUserId().intValue()));
-                }
-            });
-        }
-
-        return recruitmentProfileDTOS;
+        return new ArrayList<>();
     }
 
     @Override
