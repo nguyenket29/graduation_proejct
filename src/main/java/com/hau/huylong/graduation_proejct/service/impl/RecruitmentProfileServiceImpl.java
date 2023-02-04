@@ -311,8 +311,9 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     }
 
     @Override
-    public List<RecruitmentProfileDTO> getByListProfileId() {
-        List<RecruitmentProfileDTO> recruitmentProfileDTOS = new ArrayList<>();
+    public PageDataResponse<RecruitmentProfileDTO> getByListProfileId(SearchRecruitmentProfileRequest request) {
+        Pageable pageable = PageableUtils.of(request.getPage(), request.getSize());
+        Page<RecruitmentProfileDTO> recruitmentProfileDTOS = null;
         ObjectMapper objectMapper = new ObjectMapper();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
@@ -337,14 +338,13 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
 
         if (!CollectionUtils.isEmpty(profileIds)) {
-            List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(profileIds);
+            Page<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.getListProfile(request, profileIds, pageable);
 
             if (recruitmentProfiles.isEmpty()) {
                 throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
             }
 
-            recruitmentProfileDTOS = recruitmentProfiles.stream()
-                    .map(recruitmentProfileMapper::to).collect(Collectors.toList());
+            recruitmentProfileDTOS = recruitmentProfiles.map(recruitmentProfileMapper::to);
 
             if (!recruitmentProfileDTOS.isEmpty()) {
                 List<Long> userIds = recruitmentProfileDTOS.stream().map(RecruitmentProfileDTO::getUserId).collect(Collectors.toList());
@@ -360,7 +360,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             }
         }
 
-        return recruitmentProfileDTOS;
+        return PageDataResponse.of(recruitmentProfileDTOS);
     }
 
     @Override

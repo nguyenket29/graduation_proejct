@@ -61,8 +61,8 @@ public class RecruitmentController {
     }
 
     @GetMapping("/get-list-id")
-    public ResponseEntity<APIResponse<List<RecruitmentProfileDTO>>> getList() {
-        return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.getByListProfileId()));
+    public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getList(SearchRecruitmentProfileRequest request) {
+        return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.getByListProfileId(request)));
     }
 
     @GetMapping("/get-view")
