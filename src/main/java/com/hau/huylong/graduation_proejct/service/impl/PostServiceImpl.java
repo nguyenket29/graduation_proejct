@@ -6,10 +6,7 @@ import com.hau.huylong.graduation_proejct.common.util.BeanUtil;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
-import com.hau.huylong.graduation_proejct.entity.hau.Company;
-import com.hau.huylong.graduation_proejct.entity.hau.Post;
-import com.hau.huylong.graduation_proejct.entity.hau.RecruitmentProfile;
-import com.hau.huylong.graduation_proejct.entity.hau.UserPost;
+import com.hau.huylong.graduation_proejct.entity.hau.*;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
@@ -19,10 +16,7 @@ import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
-import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
-import com.hau.huylong.graduation_proejct.repository.hau.IndustryReps;
-import com.hau.huylong.graduation_proejct.repository.hau.PostReps;
-import com.hau.huylong.graduation_proejct.repository.hau.UserPostReps;
+import com.hau.huylong.graduation_proejct.repository.hau.*;
 import com.hau.huylong.graduation_proejct.service.PostService;
 import com.hau.huylong.graduation_proejct.service.mapper.*;
 import lombok.AllArgsConstructor;
@@ -55,6 +49,7 @@ public class PostServiceImpl implements PostService {
     private final UserInfoReps userInfoReps;
     private final UserInfoMapper userInfoMapper;
     private final UserMapper userMapper;
+    private final UserRecruitmentPostReps userRecruitmentPostReps;
 
     @Override
     public PostDTO save(PostDTO postDTO) {
@@ -152,7 +147,8 @@ public class PostServiceImpl implements PostService {
             List<Long> industryIds = page.stream().map(PostDTO::getIndustryId).collect(Collectors.toList());
             Map<Long, CompanyDTO> companyDTOMap = setCompanyDTO(companyIds);
             Map<Long, IndustryDTO> industryDTOMap = setIndustryDTO(industryIds);
-            Map<Long, Boolean> mapTopicStatusSave = mapTopicStatusSave();
+            Map<Long, Boolean> mapPostStatusSave = mapPostStatusSave();
+            Map<Long, Boolean> mapPostStatusSubmit = mapPostStatusSubmit();
 
             page.forEach(p -> {
                 if (companyDTOMap.containsKey(p.getCompanyId())) {
@@ -163,8 +159,12 @@ public class PostServiceImpl implements PostService {
                     p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
                 }
 
-                if (!CollectionUtils.isEmpty(mapTopicStatusSave) && mapTopicStatusSave.containsKey(p.getId())) {
-                    p.setUserCurrentSaved(mapTopicStatusSave.get(p.getId()));
+                if (!CollectionUtils.isEmpty(mapPostStatusSave) && mapPostStatusSave.containsKey(p.getId())) {
+                    p.setUserCurrentSaved(mapPostStatusSave.get(p.getId()));
+                }
+
+                if (!CollectionUtils.isEmpty(mapPostStatusSubmit) && mapPostStatusSubmit.containsKey(p.getId())) {
+                    p.setUserCurrentSubmited(mapPostStatusSubmit.get(p.getId()));
                 }
             });
         }
@@ -235,11 +235,29 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private Map<Long, Boolean> mapTopicStatusSave() {
+    private Map<Long, Boolean> mapPostStatusSave() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser user = (CustomUser) authentication.getPrincipal();
 
         List<UserPost> userPosts = userPostReps.findByUserId(user.getId());
+
+        Map<Long, Boolean> map = new HashMap<>();
+        if (!CollectionUtils.isEmpty(userPosts)) {
+            userPosts.forEach(u -> {
+                if (Objects.equals(u.getUserId(), user.getId())) {
+                    map.put(u.getPostId(), true);
+                }
+            });
+        }
+
+        return map;
+    }
+
+    private Map<Long, Boolean> mapPostStatusSubmit() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        List<UserRecruitmentPost> userPosts = userRecruitmentPostReps.findByUserId(user.getId());
 
         Map<Long, Boolean> map = new HashMap<>();
         if (!CollectionUtils.isEmpty(userPosts)) {
