@@ -38,5 +38,6 @@ public class PostDTO {
     private CompanyDTO companyDTO;
     private IndustryDTO industryDTO;
     private boolean userCurrentSaved;
+    private boolean userCurrentSubmited;
     private Integer view;
 }

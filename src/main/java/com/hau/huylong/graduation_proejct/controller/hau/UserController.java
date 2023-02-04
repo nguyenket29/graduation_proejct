@@ -76,7 +76,7 @@ public class UserController  {
     @GetMapping("/remove-submit-topic")
     @ApiOperation(value = "Xóa tin mà người dùng hiện tại ứng tuyển")
     public ResponseEntity<APIResponse<Void>> userCurrentRemovePost(@RequestParam Long postId) {
-        userService.userSubmitPostRecruitment(postId);
+        userService.removePostByCurrentUserSubmit(postId);
         return ResponseEntity.ok(APIResponse.success());
     }
 
