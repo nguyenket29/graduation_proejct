@@ -4,7 +4,9 @@ import com.hau.huylong.graduation_proejct.entity.auth.User;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.RecruitmentProfileDTO;
 import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
+import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfileRequest;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +27,6 @@ public interface UserService {
     void userSubmitPostRecruitment(Long postId);
     void removePostByCurrentUserSubmit(Long postId);
     PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request);
-    PageDataResponse<PostDTO> getAllPostUserRecruitmentOfEmployee(SearchPostRequest request);
+    PageDataResponse<RecruitmentProfileDTO> getAllPostUserRecruitmentOfEmployee(SearchRecruitmentProfileRequest request);
     List<IndustryDTO> getListIndustryHot();
 }

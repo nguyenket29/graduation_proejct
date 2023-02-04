@@ -2,7 +2,9 @@ package com.hau.huylong.graduation_proejct.controller.hau;
 
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.RecruitmentProfileDTO;
 import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
+import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfileRequest;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
@@ -88,7 +90,7 @@ public class UserController  {
 
     @GetMapping("/get-list-topic-employee")
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển của nhà tyển dụng")
-    public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfEmployee(SearchPostRequest request) {
+    public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getListPostOfEmployee(SearchRecruitmentProfileRequest request) {
         return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitmentOfEmployee(request)));
     }
 }

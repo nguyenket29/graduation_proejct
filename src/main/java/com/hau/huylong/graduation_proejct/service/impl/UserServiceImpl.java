@@ -2,6 +2,7 @@ package com.hau.huylong.graduation_proejct.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
@@ -15,19 +16,15 @@ import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
 import com.hau.huylong.graduation_proejct.entity.hau.UserRecruitmentPost;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
-import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.*;
 import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
+import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfileRequest;
 import com.hau.huylong.graduation_proejct.model.request.UserRequest;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.RoleReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
-import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
-import com.hau.huylong.graduation_proejct.repository.hau.IndustryReps;
-import com.hau.huylong.graduation_proejct.repository.hau.PostReps;
-import com.hau.huylong.graduation_proejct.repository.hau.UserRecruitmentPostReps;
+import com.hau.huylong.graduation_proejct.repository.hau.*;
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import com.hau.huylong.graduation_proejct.service.mapper.*;
@@ -63,6 +60,8 @@ public class UserServiceImpl implements UserService {
     private final PostMapper postMapper;
     private final IndustryMapper industryMapper;
     private final IndustryReps industryReps;
+    private final RecruitmentProfileReps recruitmentProfileReps;
+    private final RecruitmentProfileMapper recruitmentProfileMapper;
 
     /**
      * Tìm kiếm người dùng theo username và status
@@ -405,46 +404,92 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PageDataResponse<PostDTO> getAllPostUserRecruitmentOfEmployee(SearchPostRequest request) {
+    public PageDataResponse<RecruitmentProfileDTO> getAllPostUserRecruitmentOfEmployee(SearchRecruitmentProfileRequest request) {
+        ObjectMapper objectMapper = new ObjectMapper();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUser user = (CustomUser) authentication.getPrincipal();
 
-        Page<PostDTO> page = null;
-        List<Long> postIds = new ArrayList<>();
+        Page<RecruitmentProfileDTO> page = null;
+        List<Long> userIdLongs = new ArrayList<>();
         if (user.getType().equalsIgnoreCase(TypeUser.EMPLOYER.name())) {
             List<Company> companies = companyReps.findByUserIdIn(Collections.singletonList(user.getId()));
             if (!CollectionUtils.isEmpty(companies)) {
                 List<Long> companyIds = companies.stream().map(Company::getId).collect(Collectors.toList());
                 if (!CollectionUtils.isEmpty(companyIds)) {
                     List<UserRecruitmentPost> userRecruitmentPosts = userRecruitmentPostReps.findByCompanyIdIn(companyIds);
-                    postIds = userRecruitmentPosts.stream().map(UserRecruitmentPost::getPostId).collect(Collectors.toList());
+                    userIdLongs = userRecruitmentPosts.stream().map(u -> Long.parseLong(String.valueOf(u.getUserId()))).distinct().collect(Collectors.toList());
                 }
             }
 
             Pageable pageable = PageableUtils.of(request.getPage(), request.getSize());
-            page = userRecruitmentPostReps.search(request, postIds, pageable).map(postMapper::to);
+            page = recruitmentProfileReps.getListProfileOfCandidate(request, userIdLongs, pageable).map(recruitmentProfileMapper::to);
 
             if (!page.isEmpty()) {
-                List<Long> companyIds = page.stream().map(PostDTO::getCompanyId).collect(Collectors.toList());
-                List<Long> industryIds = page.stream().map(PostDTO::getIndustryId).collect(Collectors.toList());
-                Map<Long, CompanyDTO> companyDTOMap = setCompanyDTO(companyIds);
-                Map<Long, IndustryDTO> industryDTOMap = setIndustryDTO(industryIds);
-
+                List<Long> userIds = page.map(RecruitmentProfileDTO::getUserId).toList();
+                Map<Integer, UserDTO> mapUser = getUser(userIds);
                 page.forEach(p -> {
-                    if (companyDTOMap.containsKey(p.getCompanyId())) {
-                        p.setCompanyDTO(companyDTOMap.get(p.getCompanyId()));
-                    }
-
-                    if (industryDTOMap.containsKey(p.getIndustryId())) {
-                        p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
+                    setDTOProfile(objectMapper, p);
+                    if (!mapUser.isEmpty() && mapUser.containsKey(p.getUserId().intValue())) {
+                        p.setUserDTO(mapUser.get(p.getUserId().intValue()));
                     }
                 });
             }
+
         } else {
             throw APIException.from(HttpStatus.BAD_REQUEST).withMessage(user.getFullName() + " Không phải là nhà tuyển dụng");
         }
 
         return PageDataResponse.of(page);
+    }
+
+    private void setDTOProfile(ObjectMapper objectMapper, RecruitmentProfileDTO p) {
+        objectMapper.registerModule(new JavaTimeModule());
+        try {
+            AcademyInfoDTO academyInfoDTO = objectMapper
+                    .readValue(p.getAcademyInfo(), AcademyInfoDTO.class);
+            WorkExperienceDTO workExperienceDTO = objectMapper
+                    .readValue(p.getWorkExperience(), WorkExperienceDTO.class);
+            ForeignLanguageDTO foreignLanguageDTO = objectMapper
+                    .readValue(p.getForeignLanguage(), ForeignLanguageDTO.class);
+            OfficeInfoDTO officeInfoDTO = objectMapper
+                    .readValue(p.getOfficeInfo(), OfficeInfoDTO.class);
+
+            p.setAcademyInfoDTO(academyInfoDTO);
+            p.setForeignLanguageDTO(foreignLanguageDTO);
+            p.setWorkExperienceDTO(workExperienceDTO);
+            p.setOfficeInfoDTO(officeInfoDTO);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Map<Integer, UserDTO> getUser(List<Long> userIds) {
+        Map<Integer, UserDTO> map = new HashMap<>();
+
+        if (userIds != null && !userIds.isEmpty()) {
+            List<Integer> userIdInts = new ArrayList<>();
+            userIds.forEach(u -> userIdInts.add(Integer.parseInt(String.valueOf(u))));
+            map = userReps.findByIds(userIdInts).stream().map(userMapper::to).collect(Collectors.toMap(UserDTO::getId, u -> u));
+            Map<Integer, UserInfoDTO> mapUserInfo = getUseInfo(userIdInts);
+            if (!map.isEmpty()) {
+                map.forEach((k, v) -> {
+                    if (!mapUserInfo.isEmpty() && mapUserInfo.containsKey(k)) {
+                        v.setUserInfoDTO(mapUserInfo.get(k));
+                    }
+                });
+            }
+        }
+
+        return map;
+    }
+
+    private Map<Integer, UserInfoDTO> getUseInfo(List<Integer> userIds) {
+        Map<Integer, UserInfoDTO> map = new HashMap<>();
+        if (userIds != null && !userIds.isEmpty()) {
+            map = userInfoReps.findByUserIdIn(userIds).stream().map(userInfoMapper::to)
+                    .collect(Collectors.toMap(UserInfoDTO::getUserId, ui -> ui));
+        }
+        return map;
     }
 
     @Override
