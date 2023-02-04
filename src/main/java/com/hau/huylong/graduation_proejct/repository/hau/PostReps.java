@@ -39,4 +39,5 @@ public interface PostReps extends JpaRepository<Post, Long> {
     Page<Post> search(SearchPostRequest request, Pageable pageable);
 
     List<Post> findByIdIn(List<Long> postIds);
+    List<Post> findByCompanyIdIn(List<Long> companyIdIn);
 }

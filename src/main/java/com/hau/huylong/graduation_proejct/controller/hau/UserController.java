@@ -85,4 +85,10 @@ public class UserController  {
     public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfUserCurrent(SearchPostRequest request) {
         return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitment(request)));
     }
+
+    @GetMapping("/get-list-topic-employee")
+    @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển của nhà tyển dụng")
+    public ResponseEntity<APIResponse<PageDataResponse<PostDTO>>> getListPostOfEmployee(SearchPostRequest request) {
+        return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitmentOfEmployee(request)));
+    }
 }

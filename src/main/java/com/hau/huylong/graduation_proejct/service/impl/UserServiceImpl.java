@@ -9,7 +9,10 @@ import com.hau.huylong.graduation_proejct.common.util.StringUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.Role;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
-import com.hau.huylong.graduation_proejct.entity.hau.*;
+import com.hau.huylong.graduation_proejct.entity.hau.Company;
+import com.hau.huylong.graduation_proejct.entity.hau.Post;
+import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
+import com.hau.huylong.graduation_proejct.entity.hau.UserRecruitmentPost;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.CompanyDTO;
@@ -28,7 +31,6 @@ import com.hau.huylong.graduation_proejct.repository.hau.UserRecruitmentPostReps
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import com.hau.huylong.graduation_proejct.service.mapper.*;
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -397,6 +399,49 @@ public class UserServiceImpl implements UserService {
                     p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
                 }
             });
+        }
+
+        return PageDataResponse.of(page);
+    }
+
+    @Override
+    public PageDataResponse<PostDTO> getAllPostUserRecruitmentOfEmployee(SearchPostRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        Page<PostDTO> page = null;
+        List<Long> postIds = new ArrayList<>();
+        if (user.getType().equalsIgnoreCase(TypeUser.EMPLOYER.name())) {
+            List<Company> companies = companyReps.findByUserIdIn(Collections.singletonList(user.getId()));
+            if (!CollectionUtils.isEmpty(companies)) {
+                List<Long> companyIds = companies.stream().map(Company::getId).collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(companyIds)) {
+                    List<UserRecruitmentPost> userRecruitmentPosts = userRecruitmentPostReps.findByCompanyIdIn(companyIds);
+                    postIds = userRecruitmentPosts.stream().map(UserRecruitmentPost::getPostId).collect(Collectors.toList());
+                }
+            }
+
+            Pageable pageable = PageableUtils.of(request.getPage(), request.getSize());
+            page = userRecruitmentPostReps.search(request, postIds, pageable).map(postMapper::to);
+
+            if (!page.isEmpty()) {
+                List<Long> companyIds = page.stream().map(PostDTO::getCompanyId).collect(Collectors.toList());
+                List<Long> industryIds = page.stream().map(PostDTO::getIndustryId).collect(Collectors.toList());
+                Map<Long, CompanyDTO> companyDTOMap = setCompanyDTO(companyIds);
+                Map<Long, IndustryDTO> industryDTOMap = setIndustryDTO(industryIds);
+
+                page.forEach(p -> {
+                    if (companyDTOMap.containsKey(p.getCompanyId())) {
+                        p.setCompanyDTO(companyDTOMap.get(p.getCompanyId()));
+                    }
+
+                    if (industryDTOMap.containsKey(p.getIndustryId())) {
+                        p.setIndustryDTO(industryDTOMap.get(p.getIndustryId()));
+                    }
+                });
+            }
+        } else {
+            throw APIException.from(HttpStatus.BAD_REQUEST).withMessage(user.getFullName() + " Không phải là nhà tuyển dụng");
         }
 
         return PageDataResponse.of(page);
