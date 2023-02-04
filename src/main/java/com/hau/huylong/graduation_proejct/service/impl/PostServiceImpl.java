@@ -125,6 +125,9 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        Map<Long, Boolean> mapPostStatusSave = mapPostStatusSave();
+        Map<Long, Boolean> mapPostStatusSubmit = mapPostStatusSubmit();
+
         Map<Long, IndustryDTO> industryDTOMap = new HashMap<>();
         if (postOptional.get().getIndustryId() != null) {
             industryDTOMap = setIndustryDTO(Collections.singletonList(postOptional.get().getIndustryId()));
@@ -132,6 +135,14 @@ public class PostServiceImpl implements PostService {
             if (industryDTOMap.containsKey(postOptional.get().getIndustryId())) {
                 postDTO.setIndustryDTO(industryDTOMap.get(postOptional.get().getIndustryId()));
             }
+        }
+
+        if (!CollectionUtils.isEmpty(mapPostStatusSave) && mapPostStatusSave.containsKey(postDTO.getId())) {
+            postDTO.setUserCurrentSaved(mapPostStatusSave.get(postDTO.getId()));
+        }
+
+        if (!CollectionUtils.isEmpty(mapPostStatusSubmit) && mapPostStatusSubmit.containsKey(postDTO.getId())) {
+            postDTO.setUserCurrentSubmited(mapPostStatusSubmit.get(postDTO.getId()));
         }
 
         return postDTO;
