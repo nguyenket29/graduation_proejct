@@ -8,6 +8,7 @@ import com.hau.huylong.graduation_proejct.model.response.APIResponse;
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.service.RecruitmentProfileService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,7 @@ public class RecruitmentController {
     }
 
     @GetMapping("/get-list-id")
+    @ApiOperation(value = "Lấy danh sách hồ sơ đã lưu của nhà tuyển dụng")
     public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getList(SearchRecruitmentProfileRequest request) {
         return ResponseEntity.ok(APIResponse.success(recruitmentProfileService.getByListProfileId(request)));
     }

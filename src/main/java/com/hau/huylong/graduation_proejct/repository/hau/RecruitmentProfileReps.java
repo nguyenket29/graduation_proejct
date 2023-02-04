@@ -42,7 +42,7 @@ public interface RecruitmentProfileReps extends JpaRepository<RecruitmentProfile
     @Query("select i from RecruitmentProfile i " +
             " WHERE (:#{#request.userId} IS NULL OR i.userId = :#{#request.userId}) " +
             " AND (:#{#request.positionOffer} IS NULL OR i.positionOffer LIKE %:#{#request.positionOffer}%) " +
-            " AND i.permissionSearch IS TRUE " +
+//            " AND i.permissionSearch IS TRUE " +
             " AND i.id IN :profileIds " +
             " AND (:#{#request.levelDesire} IS NULL OR i.levelDesire LIKE %:#{#request.levelDesire}%) " +
             " AND (:#{#request.academyLevel} IS NULL OR i.academyLevel LIKE %:#{#request.academyLevel}%) " +
@@ -63,7 +63,7 @@ public interface RecruitmentProfileReps extends JpaRepository<RecruitmentProfile
     @Query("select i from RecruitmentProfile i " +
             " WHERE (:#{#request.userId} IS NULL OR i.userId = :#{#request.userId}) " +
             " AND (:#{#request.positionOffer} IS NULL OR i.positionOffer LIKE %:#{#request.positionOffer}%) " +
-            " AND i.permissionSearch IS TRUE " +
+//            " AND i.permissionSearch IS TRUE " +
             " AND i.userId IN :userIds " +
             " AND (:#{#request.levelDesire} IS NULL OR i.levelDesire LIKE %:#{#request.levelDesire}%) " +
             " AND (:#{#request.academyLevel} IS NULL OR i.academyLevel LIKE %:#{#request.academyLevel}%) " +

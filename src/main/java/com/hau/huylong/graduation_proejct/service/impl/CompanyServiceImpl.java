@@ -3,6 +3,7 @@ package com.hau.huylong.graduation_proejct.service.impl;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.entity.hau.Company;
+import com.hau.huylong.graduation_proejct.entity.hau.Post;
 import com.hau.huylong.graduation_proejct.entity.hau.UserRecruitmentPost;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
@@ -12,6 +13,7 @@ import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.CompanyReps;
+import com.hau.huylong.graduation_proejct.repository.hau.PostReps;
 import com.hau.huylong.graduation_proejct.repository.hau.UserRecruitmentPostReps;
 import com.hau.huylong.graduation_proejct.service.CompanyService;
 import com.hau.huylong.graduation_proejct.service.mapper.CompanyMapper;
@@ -39,6 +41,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final UserInfoMapper userInfoMapper;
     private final UserMapper userMapper;
     private final UserReps userReps;
+    private final PostReps postReps;
 
     @Override
     public CompanyDTO save(CompanyDTO companyDTO) {
@@ -69,6 +72,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .stream().map(userMapper::to).collect(Collectors.toMap(UserDTO::getId, u -> u));
         Map<Integer, UserInfoDTO> mapUseInfoDTO = userInfoReps.findByUserIdIn(Collections.singletonList(companyDTO.getUserId()))
                 .stream().map(userInfoMapper::to).collect(Collectors.toMap(UserInfoDTO::getUserId, u -> u));
+        List<Post> posts = postReps.findByCompanyIdIn(Collections.singletonList(id));
 
         if (!CollectionUtils.isEmpty(mapCompanyWithListUserId) && mapCompanyWithListUserId.containsKey(companyDTO.getId())) {
             companyDTO.setNumberStudentSubmit(mapCompanyWithListUserId.get(companyDTO.getId()).size());
@@ -82,6 +86,8 @@ public class CompanyServiceImpl implements CompanyService {
             companyDTO.setUserInfoDTO(mapUseInfoDTO.get(companyDTO.getUserId()));
         }
 
+        companyDTO.setNumberPositionSubmit(posts.size());
+
         return companyDTO;
     }
 
@@ -91,12 +97,28 @@ public class CompanyServiceImpl implements CompanyService {
         Page<CompanyDTO> companyDTOS = companyReps.search(request, pageable).map(companyMapper::to);
 
         if (!CollectionUtils.isEmpty(companyDTOS.toList())) {
+            List<Long> companyIds = companyDTOS.map(CompanyDTO::getId).toList();
             Map<Long, List<Integer>> mapCompanyWithListUserId = numberSubmitRecruitment();
             List<Integer> userIds = companyDTOS.stream().map(CompanyDTO::getUserId).collect(Collectors.toList());
             Map<Integer, UserDTO> mapUserDTO = userReps.findByIds(userIds)
                     .stream().map(userMapper::to).collect(Collectors.toMap(UserDTO::getId, u -> u));
             Map<Integer, UserInfoDTO> mapUseInfoDTO = userInfoReps.findByUserIdIn(userIds)
                     .stream().map(userInfoMapper::to).collect(Collectors.toMap(UserInfoDTO::getUserId, u -> u));
+
+            Map<Long, List<Long>> mapCompanyIdWithListPostId = new HashMap<>();
+            List<Post> posts = postReps.findByCompanyIdIn(companyIds);
+            if (!CollectionUtils.isEmpty(posts)) {
+                companyIds.forEach(c -> {
+                    List<Long> postIds = new ArrayList<>();
+                    posts.forEach(p -> {
+                        if (Objects.equals(p.getCompanyId(), c)) {
+                            postIds.add(p.getId());
+                        }
+                    });
+                    mapCompanyIdWithListPostId.put(c, postIds);
+                });
+            }
+
 
             for (CompanyDTO companyDTO : companyDTOS) {
                 if (!CollectionUtils.isEmpty(mapCompanyWithListUserId) && mapCompanyWithListUserId.containsKey(companyDTO.getId())) {
@@ -109,6 +131,11 @@ public class CompanyServiceImpl implements CompanyService {
 
                 if (!CollectionUtils.isEmpty(mapUseInfoDTO) && mapUseInfoDTO.containsKey(companyDTO.getUserId())) {
                     companyDTO.setUserInfoDTO(mapUseInfoDTO.get(companyDTO.getUserId()));
+                }
+
+                if (!CollectionUtils.isEmpty(mapCompanyIdWithListPostId) &&
+                        mapCompanyIdWithListPostId.containsKey(companyDTO.getId())) {
+                    companyDTO.setNumberPositionSubmit(mapCompanyIdWithListPostId.get(companyDTO.getId()).size());
                 }
             }
         }

@@ -27,6 +27,7 @@ public class CompanyDTO {
     private String businessIntroduction;
 
     private Integer numberStudentSubmit;
+    private Integer numberPositionSubmit;
     private UserInfoDTO userInfoDTO;
     private UserDTO userDTO;
 }

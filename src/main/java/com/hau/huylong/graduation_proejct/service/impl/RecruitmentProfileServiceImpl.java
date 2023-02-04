@@ -338,13 +338,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
 
 
         if (!CollectionUtils.isEmpty(profileIds)) {
-            Page<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.getListProfile(request, profileIds, pageable);
-
-            if (recruitmentProfiles.isEmpty()) {
-                throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
-            }
-
-            recruitmentProfileDTOS = recruitmentProfiles.map(recruitmentProfileMapper::to);
+            recruitmentProfileDTOS = recruitmentProfileReps.getListProfile(request, profileIds, pageable).map(recruitmentProfileMapper::to);
 
             if (!recruitmentProfileDTOS.isEmpty()) {
                 List<Long> userIds = recruitmentProfileDTOS.stream().map(RecruitmentProfileDTO::getUserId).collect(Collectors.toList());
@@ -358,11 +352,9 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
                     }
                 });
             }
-
-            return PageDataResponse.of(recruitmentProfileDTOS);
         }
 
-        return PageDataResponse.of(String.valueOf(0), new ArrayList<>());
+        return PageDataResponse.of(recruitmentProfileDTOS);
     }
 
     @Override
