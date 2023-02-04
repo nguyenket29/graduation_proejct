@@ -358,9 +358,11 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
                     }
                 });
             }
+
+            return PageDataResponse.of(recruitmentProfileDTOS);
         }
 
-        return PageDataResponse.of(recruitmentProfileDTOS);
+        return PageDataResponse.of(String.valueOf(0), new ArrayList<>());
     }
 
     @Override
