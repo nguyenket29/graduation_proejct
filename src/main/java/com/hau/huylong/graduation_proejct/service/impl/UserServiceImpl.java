@@ -441,14 +441,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void removeRecruitmentByEmployee(Long profileId) {
-        List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(Collections.singletonList(profileId));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
 
-        if (!CollectionUtils.isEmpty(recruitmentProfiles)) {
-            List<Integer> userIds = recruitmentProfiles.stream().map(r -> r.getUserId().intValue()).collect(Collectors.toList());
-            if (!CollectionUtils.isEmpty(userIds)) {
-                List<UserRecruitmentPost> userRecruitmentPosts = userRecruitmentPostReps.findByUserIdIn(userIds);
-                if (!CollectionUtils.isEmpty(userRecruitmentPosts)) {
-                    userRecruitmentPosts.removeAll(userRecruitmentPosts);
+        if (user.getType().equalsIgnoreCase(TypeUser.EMPLOYER.name())) {
+            List<Company> companies = companyReps.findByUserIdIn(Collections.singletonList(user.getId()));
+            List<Long> companyIds = companies.stream().map(Company::getId).collect(Collectors.toList());
+            List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(Collections.singletonList(profileId));
+
+            if (!CollectionUtils.isEmpty(recruitmentProfiles)) {
+                List<Integer> userIds = recruitmentProfiles.stream().map(r -> r.getUserId().intValue()).collect(Collectors.toList());
+                if (!CollectionUtils.isEmpty(userIds)) {
+                    List<UserRecruitmentPost> userRecruitmentPosts = userRecruitmentPostReps.findByUserIdInAndCompanyIdIn(userIds, companyIds);
+                    if (!CollectionUtils.isEmpty(userRecruitmentPosts)) {
+                        userRecruitmentPostReps.deleteAll(userRecruitmentPosts);
+                    }
                 }
             }
         }
