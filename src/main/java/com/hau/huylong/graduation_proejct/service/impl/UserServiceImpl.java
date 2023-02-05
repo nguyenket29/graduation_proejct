@@ -10,10 +10,7 @@ import com.hau.huylong.graduation_proejct.common.util.StringUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
 import com.hau.huylong.graduation_proejct.entity.auth.Role;
 import com.hau.huylong.graduation_proejct.entity.auth.User;
-import com.hau.huylong.graduation_proejct.entity.hau.Company;
-import com.hau.huylong.graduation_proejct.entity.hau.Post;
-import com.hau.huylong.graduation_proejct.entity.hau.UserInfo;
-import com.hau.huylong.graduation_proejct.entity.hau.UserRecruitmentPost;
+import com.hau.huylong.graduation_proejct.entity.hau.*;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserInfoDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.*;
@@ -442,6 +439,20 @@ public class UserServiceImpl implements UserService {
         return PageDataResponse.of(page);
     }
 
+    @Override
+    public void removeRecruitmentByEmployee(Long profileId) {
+        List<RecruitmentProfile> recruitmentProfiles = recruitmentProfileReps.findByIdIn(Collections.singletonList(profileId));
+
+        if (!CollectionUtils.isEmpty(recruitmentProfiles)) {
+            List<Integer> userIds = recruitmentProfiles.stream().map(r -> r.getUserId().intValue()).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(userIds)) {
+                List<UserRecruitmentPost> userRecruitmentPosts = userRecruitmentPostReps.findByUserIdIn(userIds);
+                if (!CollectionUtils.isEmpty(userRecruitmentPosts)) {
+                    userRecruitmentPosts.removeAll(userRecruitmentPosts);
+                }
+            }
+        }
+    }
     private void setDTOProfile(ObjectMapper objectMapper, RecruitmentProfileDTO p) {
         objectMapper.registerModule(new JavaTimeModule());
         try {

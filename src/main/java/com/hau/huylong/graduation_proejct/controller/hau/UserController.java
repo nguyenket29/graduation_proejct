@@ -88,6 +88,13 @@ public class UserController  {
         return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitment(request)));
     }
 
+    @GetMapping("/remove-profile-by-employee")
+    @ApiOperation(value = "Nhà tuyển dụng xoa hồ sơ ứng tuyển")
+    public ResponseEntity<APIResponse<Void>> removeProfileByEmployee(@RequestParam Long profileId) {
+        userService.removeRecruitmentByEmployee(profileId);
+        return ResponseEntity.ok(APIResponse.success());
+    }
+
     @GetMapping("/get-list-topic-employee")
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển của nhà tyển dụng")
     public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getListPostOfEmployee(SearchRecruitmentProfileRequest request) {

@@ -38,6 +38,7 @@ public interface RecruitmentProfileReps extends JpaRepository<RecruitmentProfile
     Optional<RecruitmentProfile> findByUserId(Long userId);
 
     List<RecruitmentProfile> findByIdIn(List<Long> ids);
+    List<RecruitmentProfile> findByUserIdIn(List<Long> userIds);
 
     @Query("select i from RecruitmentProfile i " +
             " WHERE (:#{#request.userId} IS NULL OR i.userId = :#{#request.userId}) " +

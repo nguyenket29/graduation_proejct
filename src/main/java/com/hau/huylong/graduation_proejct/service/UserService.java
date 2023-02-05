@@ -27,6 +27,7 @@ public interface UserService {
     void userSubmitPostRecruitment(Long postId);
     void removePostByCurrentUserSubmit(Long postId);
     PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request);
+    void removeRecruitmentByEmployee(Long profileId);
     PageDataResponse<RecruitmentProfileDTO> getAllPostUserRecruitmentOfEmployee(SearchRecruitmentProfileRequest request);
     List<IndustryDTO> getListIndustryHot();
 }
