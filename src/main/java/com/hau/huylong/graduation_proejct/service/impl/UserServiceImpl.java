@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hau.huylong.graduation_proejct.common.enums.TypeUser;
 import com.hau.huylong.graduation_proejct.common.exception.APIException;
+import com.hau.huylong.graduation_proejct.common.util.MapUtil;
 import com.hau.huylong.graduation_proejct.common.util.PageableUtils;
 import com.hau.huylong.graduation_proejct.common.util.StringUtils;
 import com.hau.huylong.graduation_proejct.entity.auth.CustomUser;
@@ -534,23 +535,28 @@ public class UserServiceImpl implements UserService {
         List<Long> postIds = new ArrayList<>();
         Map<Long, Integer> mapPostWithNumberStd = new HashMap<>();
         if (!CollectionUtils.isEmpty(mapPostWithListUserId)) {
-            mapPostWithListUserId.forEach((k, v) -> {
+            for (Map.Entry<Long, List<Integer>> entry : mapPostWithListUserId.entrySet()) {
+                Long k = entry.getKey();
+                List<Integer> v = entry.getValue();
                 mapPostWithNumberStd.put(k, v.size());
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(mapPostWithNumberStd)) {
+            mapPostWithNumberStd = MapUtil.sortByValue(mapPostWithNumberStd);
+            mapPostWithNumberStd.forEach((k, v) -> {
                 postIds.add(k);
             });
         }
 
         List<Post> posts = postReps.findByIdIn(postIds);
-
         List<Long> industryIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(posts)) {
             industryIds = posts.stream().map(Post::getIndustryId).distinct().collect(Collectors.toList());
         }
 
-        List<IndustryDTO> industryDTOS = industryReps.findByIdIn(industryIds)
+        return industryReps.findByIdIn(industryIds)
                 .stream().map(industryMapper::to).collect(Collectors.toList());
-
-        return null;
     }
 
     private Map<Long, CompanyDTO> setCompanyDTO(List<Long> companyIds) {

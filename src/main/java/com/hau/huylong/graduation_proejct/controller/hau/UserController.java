@@ -1,6 +1,7 @@
 package com.hau.huylong.graduation_proejct.controller.hau;
 
 import com.hau.huylong.graduation_proejct.model.dto.auth.UserDTO;
+import com.hau.huylong.graduation_proejct.model.dto.hau.IndustryDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.PostDTO;
 import com.hau.huylong.graduation_proejct.model.dto.hau.RecruitmentProfileDTO;
 import com.hau.huylong.graduation_proejct.model.request.SearchPostRequest;
@@ -99,5 +100,11 @@ public class UserController  {
     @ApiOperation(value = "Lấy danh sách bài viết người dùng hiện tại đã ứng tuyển của nhà tyển dụng")
     public ResponseEntity<APIResponse<PageDataResponse<RecruitmentProfileDTO>>> getListPostOfEmployee(SearchRecruitmentProfileRequest request) {
         return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitmentOfEmployee(request)));
+    }
+
+    @GetMapping("/get-industry-hot")
+    @ApiOperation(value = "Lấy danh sách ngành nghề phổ biến")
+    public ResponseEntity<APIResponse<List<IndustryDTO>>> getListIndustryHot() {
+        return ResponseEntity.ok(APIResponse.success(userService.getListIndustryHot()));
     }
 }
