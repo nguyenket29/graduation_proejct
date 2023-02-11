@@ -26,6 +26,7 @@ import com.hau.huylong.graduation_proejct.repository.hau.*;
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import com.hau.huylong.graduation_proejct.service.mapper.*;
+import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -512,7 +513,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<IndustryDTO> getListIndustryHot() {
+    public Map<Long, Integer> mapIndustryWithNumber() {
         List<UserRecruitmentPost> userPosts = userRecruitmentPostReps.findAll();
 
         Map<Long, List<Integer>> mapPostWithListUserId = new HashMap<>();
@@ -532,6 +533,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        // Lấy số lượng ứng tuyển theo bài viết
         List<Long> postIds = new ArrayList<>();
         Map<Long, Integer> mapPostWithNumberStd = new HashMap<>();
         if (!CollectionUtils.isEmpty(mapPostWithListUserId)) {
@@ -544,19 +546,50 @@ public class UserServiceImpl implements UserService {
 
         if (!CollectionUtils.isEmpty(mapPostWithNumberStd)) {
             mapPostWithNumberStd = MapUtil.sortByValue(mapPostWithNumberStd);
-            mapPostWithNumberStd.forEach((k, v) -> {
-                postIds.add(k);
-            });
+            mapPostWithNumberStd.forEach((k, v) -> postIds.add(k));
         }
 
         List<Post> posts = postReps.findByIdIn(postIds);
+        Map<Long, List<Long>> mapIdIndustryWithListPostId = new HashMap<>();
+
+        // Lấy danh dánh bài viết của ngành nghề
         List<Long> industryIds = new ArrayList<>();
         if (!CollectionUtils.isEmpty(posts)) {
             industryIds = posts.stream().map(Post::getIndustryId).distinct().collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(industryIds)) {
+                for (Long i : industryIds) {
+                    List<Long> postIdList = new ArrayList<>();
+                    for (Post p : posts) {
+                        if (Objects.equals(i, p.getIndustryId())) {
+                            postIdList.add(p.getId());
+                        }
+                    }
+                    mapIdIndustryWithListPostId.put(i, postIdList);
+                }
+            }
         }
 
-        return industryReps.findByIdIn(industryIds)
-                .stream().map(industryMapper::to).collect(Collectors.toList());
+        // Lấy số lượng ứng tuyển theo tất cả bài viết thuộc ngành nghề đó
+        Map<Long, Integer> mapIndustryWithNumber = new HashMap<>();
+        if (!CollectionUtils.isEmpty(mapIdIndustryWithListPostId) && !CollectionUtils.isEmpty(mapPostWithNumberStd)) {
+            for (Map.Entry<Long, List<Long>> entry : mapIdIndustryWithListPostId.entrySet()) {
+                Long k = entry.getKey();
+                List<Long> v = entry.getValue();
+
+                Integer sumStd = 0;
+                for (Map.Entry<Long, Integer> e : mapPostWithNumberStd.entrySet()) {
+                    Long i = e.getKey();
+                    Integer n = e.getValue();
+                    if (!CollectionUtils.isEmpty(v) && v.contains(i)) {
+                        sumStd += n;
+                    }
+                }
+
+                mapIndustryWithNumber.put(k, sumStd);
+            }
+        }
+
+        return mapIndustryWithNumber;
     }
 
     private Map<Long, CompanyDTO> setCompanyDTO(List<Long> companyIds) {

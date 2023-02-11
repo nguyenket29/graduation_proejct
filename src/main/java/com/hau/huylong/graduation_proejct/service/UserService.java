@@ -12,6 +12,7 @@ import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {
@@ -29,5 +30,5 @@ public interface UserService {
     PageDataResponse<PostDTO> getAllPostUserRecruitment(SearchPostRequest request);
     void removeRecruitmentByEmployee(Long profileId);
     PageDataResponse<RecruitmentProfileDTO> getAllPostUserRecruitmentOfEmployee(SearchRecruitmentProfileRequest request);
-    List<IndustryDTO> getListIndustryHot();
+    Map<Long, Integer> mapIndustryWithNumber();
 }

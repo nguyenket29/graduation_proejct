@@ -102,9 +102,9 @@ public class UserController  {
         return ResponseEntity.ok(APIResponse.success(userService.getAllPostUserRecruitmentOfEmployee(request)));
     }
 
-    @GetMapping("/get-industry-hot")
-    @ApiOperation(value = "Lấy danh sách ngành nghề phổ biến")
-    public ResponseEntity<APIResponse<List<IndustryDTO>>> getListIndustryHot() {
-        return ResponseEntity.ok(APIResponse.success(userService.getListIndustryHot()));
-    }
+//    @GetMapping("/get-industry-hot")
+//    @ApiOperation(value = "Lấy danh sách ngành nghề phổ biến")
+//    public ResponseEntity<APIResponse<List<IndustryDTO>>> getListIndustryHot() {
+//        return ResponseEntity.ok(APIResponse.success(userService.getListIndustryHot()));
+//    }
 }
