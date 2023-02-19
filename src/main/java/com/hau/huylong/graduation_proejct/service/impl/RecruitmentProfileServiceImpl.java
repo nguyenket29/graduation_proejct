@@ -18,6 +18,7 @@ import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.RecruitmentProfileReps;
+import com.hau.huylong.graduation_proejct.service.FileService;
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.RecruitmentProfileService;
 import com.hau.huylong.graduation_proejct.service.mapper.RecruitmentProfileMapper;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,6 +50,7 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
     private final UserInfoReps userInfoReps;
     private final UserInfoMapper userInfoMapper;
     private final UserReps userReps;
+    private final FileService fileService;
     private final UserMapper userMapper;
 
     @Override
@@ -234,6 +237,24 @@ public class RecruitmentProfileServiceImpl implements RecruitmentProfileService 
             recruitmentProfileReps.save(recruitmentProfile);
         }
 
+        return fileId;
+    }
+
+    @Override
+    public String uploadProfileLocal(MultipartFile file) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        String fileId = fileService.save(file).getId().toString();
+        Optional<RecruitmentProfile> recruitmentProfileOptional = recruitmentProfileReps.findByUserId(customUser.getId().longValue());
+
+        if (recruitmentProfileOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy hồ sơ tuyển dụng");
+        }
+
+        RecruitmentProfile recruitmentProfile = recruitmentProfileOptional.get();
+        recruitmentProfile.setFileId(fileId);
+
+        recruitmentProfileReps.save(recruitmentProfile);
         return fileId;
     }
 

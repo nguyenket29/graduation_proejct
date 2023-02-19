@@ -41,6 +41,7 @@ inventory:
     path: ./logs/development
 
 port-fe: 8080
+upload.path: ./uploads/
 
 application:
   default-password: $2a$12$VDjPUakwg8oMceR4dtvlvOCWrQKZpEnSjNSnN3VSrbLO.Jnq4Ua46 #$2a$12$CVy4btq466w7HPQbLx0eNetqANEt.7aGKsV.WS410qPPYJ0C36jAS #bpwgcdgsvhwqeikj

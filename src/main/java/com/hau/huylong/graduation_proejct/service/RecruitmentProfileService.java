@@ -5,12 +5,14 @@ import com.hau.huylong.graduation_proejct.model.request.SearchRecruitmentProfile
 import com.hau.huylong.graduation_proejct.model.response.PageDataResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface RecruitmentProfileService extends GenericService<RecruitmentProfileDTO, SearchRecruitmentProfileRequest> {
     RecruitmentProfileDTO findByUserId();
     void activeSearch(boolean check);
     String uploadProfile(MultipartFile file, String filePath, boolean isPublic);
+    String uploadProfileLocal(MultipartFile file) throws IOException;
     void saveListProfile(List<Long> ids);
     void removeProfileRecruitment(Long profileId);
     PageDataResponse<RecruitmentProfileDTO> getByListProfileId(SearchRecruitmentProfileRequest request);

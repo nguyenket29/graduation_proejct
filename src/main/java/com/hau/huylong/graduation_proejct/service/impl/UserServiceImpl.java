@@ -23,6 +23,7 @@ import com.hau.huylong.graduation_proejct.repository.auth.RoleReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserInfoReps;
 import com.hau.huylong.graduation_proejct.repository.auth.UserReps;
 import com.hau.huylong.graduation_proejct.repository.hau.*;
+import com.hau.huylong.graduation_proejct.service.FileService;
 import com.hau.huylong.graduation_proejct.service.GoogleDriverFile;
 import com.hau.huylong.graduation_proejct.service.UserService;
 import com.hau.huylong.graduation_proejct.service.mapper.*;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService {
     private final UserInfoMapper userInfoMapper;
     private final CompanyReps companyReps;
     private final CompanyMapper companyMapper;
+    private final FileService fileService;
     private final GoogleDriverFile googleDriverFile;
     private final UserRecruitmentPostReps userRecruitmentPostReps;
     private final PostReps postReps;
@@ -308,6 +311,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String uploadAvatarLocal(MultipartFile file) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+        String fileId = fileService.save(file).getId().toString();
+        Optional<UserInfo> userInfoOptional = userInfoReps.findByUserId(user.getId());
+
+        if (userInfoOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy người dùng");
+        }
+
+        UserInfo userInfo = userInfoOptional.get();
+        userInfo.setAvatar(fileId);
+
+        userInfoReps.save(userInfo);
+        return fileId;
+    }
+
+    @Override
     public void inActive(Integer userId, boolean check) {
         Optional<User> userOptional = userReps.findById(userId);
 
@@ -335,6 +356,22 @@ public class UserServiceImpl implements UserService {
         }
 
         String fileId = googleDriverFile.uploadFile(file, filePath, isPublic);
+        companyOptional.get().setFileId(fileId);
+        companyReps.save(companyOptional.get());
+        return fileId;
+    }
+
+    @Override
+    public String uploadCompanyProfileLocal(MultipartFile file) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUser user = (CustomUser) authentication.getPrincipal();
+
+        Optional<Company> companyOptional = companyReps.findByUserId(user.getId());
+        if (companyOptional.isEmpty()) {
+            throw APIException.from(HttpStatus.NOT_FOUND).withMessage("Không tìm thấy công ty");
+        }
+
+        String fileId = fileService.save(file).getId().toString();
         companyOptional.get().setFileId(fileId);
         companyReps.save(companyOptional.get());
         return fileId;

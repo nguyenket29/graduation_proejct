@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -61,12 +62,23 @@ public class UserController  {
         return ResponseEntity.ok(APIResponse.success());
     }
 
+    @PostMapping("/avatar-local")
+    public ResponseEntity<APIResponse<String>> uploadAvatarLocal(@RequestParam("fileUpload") MultipartFile fileUpload) throws IOException {
+        return ResponseEntity.ok(APIResponse.success(userService.uploadAvatarLocal(fileUpload)));
+    }
+
     @ApiOperation(value = "API upload hồ sơ công ty")
     @PostMapping("/company-profile")
     public ResponseEntity<APIResponse<String>> uploadProfileCompany(@RequestParam("fileUpload") MultipartFile fileUpload,
                                                           @RequestParam("filePath") String pathFile,
                                                           @RequestParam("shared") String shared) {
         return ResponseEntity.ok(APIResponse.success(userService.uploadCompanyProfile(fileUpload, pathFile, Boolean.parseBoolean(shared))));
+    }
+
+    @ApiOperation(value = "API upload hồ sơ công ty local")
+    @PostMapping("/company-profile-local")
+    public ResponseEntity<APIResponse<String>> uploadProfileCompanyLocal(@RequestParam("fileUpload") MultipartFile fileUpload) throws IOException {
+        return ResponseEntity.ok(APIResponse.success(userService.uploadCompanyProfileLocal(fileUpload)));
     }
 
     @GetMapping("/user-submit-topic")
